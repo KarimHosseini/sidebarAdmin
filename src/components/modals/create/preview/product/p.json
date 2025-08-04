@@ -1,0 +1,218 @@
+{
+  "data": [
+    {
+      "id": 2673,
+      "title": "gregre",
+      "image": 2860,
+      "brandId": 38,
+      "categoryId": 28,
+      "seo": null,
+      "available": true,
+      "discount": 500,
+      "minPrice": 1,
+      "maxPrice": 1000,
+      "hasRange": 1,
+      "minPriceBeforeDiscount": 1000,
+      "topDiscount": 50,
+      "alt": null,
+      "imageUrl": "754",
+      "colors": [
+        {
+          "title": "توسی",
+          "value": "afafaf#",
+          "imageUrl": ""
+        },
+        {
+          "title": "مشکی",
+          "value": "#000000",
+          "imageUrl": ""
+        },
+        {
+          "title": "test image",
+          "value": "",
+          "imageUrl": ""
+        }
+      ]
+    },
+    {
+      "id": 2669,
+      "title": "test5",
+      "image": 2860,
+      "brandId": 36,
+      "categoryId": 27,
+      "seo": null,
+      "available": true,
+      "discount": 1000,
+      "minPrice": 2000,
+      "maxPrice": 5000,
+      "hasRange": 1,
+      "minPriceBeforeDiscount": 2000,
+      "topDiscount": 50,
+      "alt": null,
+      "imageUrl": "754",
+      "colors": [
+        {
+          "title": "قرمز",
+          "value": "linear-gradient(90deg, RGBA(115, 7, 7, 1) 0%, rgba(255,0,0,1) 100%)",
+          "imageUrl": ""
+        },
+        {
+          "title": "نارنجی",
+          "value": "#fc8400",
+          "imageUrl": ""
+        }
+      ]
+    },
+    {
+      "id": 2668,
+      "title": "test4",
+      "image": 2860,
+      "brandId": 39,
+      "categoryId": 27,
+      "seo": null,
+      "available": true,
+      "discount": 1100,
+      "minPrice": 1200,
+      "maxPrice": 1200,
+      "hasRange": 0,
+      "minPriceBeforeDiscount": 1200,
+      "topDiscount": 8.3,
+      "alt": null,
+      "imageUrl": "754",
+      "colors": [
+        {
+          "title": "نارنجی",
+          "value": "#fc8400",
+          "imageUrl": ""
+        }
+      ]
+    },
+    {
+      "id": 2660,
+      "title": "گوشی موبایل سامسونگ مدل Galaxy A14 ظرفیت 64 گیگابایت رم 4 گیگابایت",
+      "image": 2860,
+      "brandId": 2,
+      "categoryId": 1,
+      "seo": null,
+      "available": true,
+      "discount": 500,
+      "minPrice": 1,
+      "maxPrice": 2000,
+      "hasRange": 1,
+      "minPriceBeforeDiscount": 1200,
+      "topDiscount": 58.3,
+      "alt": null,
+      "imageUrl": "754",
+      "colors": [
+        {
+          "title": "قرمز",
+          "value": "linear-gradient(90deg, RGBA(115, 7, 7, 1) 0%, rgba(255,0,0,1) 100%)",
+          "imageUrl": ""
+        },
+        {
+          "title": "مشکی",
+          "value": "#000000",
+          "imageUrl": ""
+        },
+        {
+          "title": "نقره ای",
+          "value": "#dbdbdb",
+          "imageUrl": ""
+        },
+        {
+          "title": "سبز روشن",
+          "value": "#a8fb93",
+          "imageUrl": ""
+        }
+      ]
+    },
+    {
+      "id": 2645,
+      "title": "گوشی موبایل اپل مدل iphone 13 promax ZA/A با طرفیت 128 گیگابایت رم 6 گیگابایت",
+      "image": 2860,
+      "brandId": 1,
+      "categoryId": 1,
+      "seo": null,
+      "available": true,
+      "discount": 0,
+      "minPrice": 1,
+      "maxPrice": 98000000,
+      "hasRange": 1,
+      "minPriceBeforeDiscount": 0,
+      "topDiscount": 0,
+      "alt": null,
+      "imageUrl": "754",
+      "colors": [
+        {
+          "title": "مشکی",
+          "value": "#000000",
+          "imageUrl": ""
+        },
+        {
+          "title": "طلایی",
+          "value": "#fae993",
+          "imageUrl": ""
+        },
+        {
+          "title": "سبز آلپاین",
+          "value": "#3a6336",
+          "imageUrl": ""
+        },
+        {
+          "title": "نقره ای",
+          "value": "#dbdbdb",
+          "imageUrl": ""
+        },
+        {
+          "title": "آبی روشن",
+          "value": "#e8fffa",
+          "imageUrl": ""
+        }
+      ]
+    },
+    {
+      "id": 2644,
+      "title": "گوشی موبایل اپل مدل iphone 13 promax ZA/A با ظرفیت 512 گیگابایت رم 6 گیگابایت ",
+      "image": 2860,
+      "brandId": 1,
+      "categoryId": 1,
+      "seo": null,
+      "available": true,
+      "discount": 0,
+      "minPrice": 1,
+      "maxPrice": 1,
+      "hasRange": 1,
+      "minPriceBeforeDiscount": 0,
+      "topDiscount": 0,
+      "alt": null,
+      "imageUrl": "754",
+      "colors": [
+        {
+          "title": "مشکی",
+          "value": "#000000",
+          "imageUrl": ""
+        },
+        {
+          "title": "طلایی",
+          "value": "#fae993",
+          "imageUrl": ""
+        },
+        {
+          "title": "سبز آلپاین",
+          "value": "#3a6336",
+          "imageUrl": ""
+        },
+        {
+          "title": "نقره ای",
+          "value": "#dbdbdb",
+          "imageUrl": ""
+        },
+        {
+          "title": "آبی روشن",
+          "value": "#e8fffa",
+          "imageUrl": ""
+        }
+      ]
+    }
+  ]
+}

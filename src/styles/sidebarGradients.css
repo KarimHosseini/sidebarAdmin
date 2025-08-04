@@ -1,0 +1,98 @@
+/* Sidebar and Page Title Gradient Styles */
+/* This file bypasses CSS-in-JS processor to avoid stylis errors */
+
+/* Dark theme sidebar background */
+[data-theme="dark"] .sidebar-dark-gradient {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important;
+}
+
+/* Dark theme page title background */
+[data-theme="dark"] .page-title-dark-gradient {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important;
+}
+
+/* Sidebar header gradient */
+[data-theme="dark"] .sidebar-header-gradient {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
+}
+
+/* Sidebar search container gradient */
+[data-theme="dark"] .sidebar-search-gradient {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%) !important;
+}
+
+/* Selected menu item gradients */
+[data-theme="dark"] .menu-item-selected-gradient {
+  background: linear-gradient(135deg, rgba(100, 181, 246, 0.15) 0%, rgba(100, 181, 246, 0.1) 100%) !important;
+}
+
+[data-theme="dark"] .menu-item-hover-gradient {
+  background: linear-gradient(135deg, rgba(100, 181, 246, 0.2) 0%, rgba(100, 181, 246, 0.15) 100%) !important;
+}
+
+/* Submenu item gradients */
+[data-theme="dark"] .submenu-item-selected-gradient {
+  background: linear-gradient(135deg, rgba(100, 181, 246, 0.12) 0%, rgba(100, 181, 246, 0.08) 100%) !important;
+}
+
+[data-theme="dark"] .submenu-item-hover-gradient {
+  background: linear-gradient(135deg, rgba(100, 181, 246, 0.16) 0%, rgba(100, 181, 246, 0.12) 100%) !important;
+}
+
+/* Accordion item gradients */
+[data-theme="dark"] .accordion-item-selected-gradient {
+  background: linear-gradient(135deg, rgba(100, 181, 246, 0.15) 0%, rgba(100, 181, 246, 0.1) 100%) !important;
+}
+
+[data-theme="dark"] .accordion-item-hover-gradient {
+  background: linear-gradient(135deg, rgba(100, 181, 246, 0.18) 0%, rgba(100, 181, 246, 0.13) 100%) !important;
+}
+
+/* Button gradients */
+[data-theme="dark"] .MuiButton-containedPrimary {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%) !important;
+}
+
+[data-theme="dark"] .MuiButton-containedPrimary:hover {
+  background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%) !important;
+}
+
+[data-theme="dark"] .MuiButton-containedSecondary {
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%) !important;
+}
+
+[data-theme="dark"] .MuiButton-containedSecondary:hover {
+  background: linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%) !important;
+}
+
+[data-theme="dark"] .MuiButton-containedSuccess {
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%) !important;
+}
+
+[data-theme="dark"] .MuiButton-containedSuccess:hover {
+  background: linear-gradient(135deg, #1b5e20 0%, #0d4f14 100%) !important;
+}
+
+[data-theme="dark"] .MuiButton-containedWarning {
+  background: linear-gradient(135deg, #ed6c02 0%, #e65100 100%) !important;
+}
+
+[data-theme="dark"] .MuiButton-containedWarning:hover {
+  background: linear-gradient(135deg, #e65100 0%, #bf360c 100%) !important;
+}
+
+[data-theme="dark"] .MuiButton-containedError {
+  background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%) !important;
+}
+
+[data-theme="dark"] .MuiButton-containedError:hover {
+  background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%) !important;
+}
+
+[data-theme="dark"] .MuiButton-containedInfo {
+  background: linear-gradient(135deg, #0288d1 0%, #0277bd 100%) !important;
+}
+
+[data-theme="dark"] .MuiButton-containedInfo:hover {
+  background: linear-gradient(135deg, #0277bd 0%, #01579b 100%) !important;
+} 

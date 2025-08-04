@@ -116,7 +116,7 @@ const Sidebar = ({ headerMenu, viewALl, setViewALl }) => {
       color: (theme) =>
         theme.palette.mode === "light" 
           ? "rgba(162, 162, 168, 0.81)" 
-          : "rgba(255, 255, 255, 0.8)",
+          : "rgba(255, 255, 255, 0.85)",
     },
     listItemText: {
       textAlign: "left",
@@ -125,7 +125,7 @@ const Sidebar = ({ headerMenu, viewALl, setViewALl }) => {
           ? "rgba(0, 0, 0)" 
           : "rgba(255, 255, 255, 0.9)",
       opacity: viewALl || hover ? 1 : 0,
-      transition: "all 450ms ease",
+      transition: "all 0.5s ease",
     },
   };
   const isMd = useMediaQuery("(min-width:900px)");
@@ -149,7 +149,7 @@ const Sidebar = ({ headerMenu, viewALl, setViewALl }) => {
         top: 0,
         height: "100%",
         zIndex: 100,
-        transition: "transform 450ms ease, width 450ms ease",
+        transition: "transform 0.5s ease, width 0.5s ease",
         overflowY: "auto",
         overflowX: "hidden",
         transform: "translateX(0)",
@@ -277,7 +277,7 @@ const Sidebar = ({ headerMenu, viewALl, setViewALl }) => {
                 '&.Mui-focused': {
                   borderColor: "rgba(99, 102, 241, 0.5)",
                   backgroundColor: "rgba(255, 255, 255, 0.05)",
-                  boxShadow: "0 0 20px rgba(99, 102, 241, 0.3)",
+                  boxShadow: "0 0 8px rgba(99, 102, 241, 0.2)",
                 },
               },
               '& .MuiInputBase-input': {

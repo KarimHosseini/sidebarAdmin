@@ -1,166 +1,333 @@
-import React from 'react';
-import { Box, Typography, Breadcrumbs, Link } from '@mui/material';
-import { NavigateNext, Home } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+/* eslint-disable react-hooks/exhaustive-deps */
+import MenuIcon from "@mui/icons-material/Menu";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import {
+  Button,
+  Drawer,
+  Paper,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
+import { Box } from "@mui/system";
+import moment from "jalali-moment";
+import { useEffect, useState, memo, useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import {
+  baseUrl,
+  GET_ACCESS_PROFILE,
+  REMOVE_STATIC_DATA_CACHE,
+} from "../../helpers/api-routes";
+import { configReq } from "../../helpers/functions";
+import { openDrawer } from "../../redux/slices/menu";
+import axiosInstance from "../dataFetch/axiosInstance";
+import BroadCrumb from "./BroadCrumb";
+import DarkModeSwitch from "./darkModeSwitch";
+import SearchPage from "./searchPage";
+import Settings from "./setting";
 
-const PageTitle = ({ 
-  title, 
-  subtitle, 
-  breadcrumbs = [], 
-  actions, 
-  icon: Icon,
-  gradient = true 
+// Memoized date component for better performance
+const DateDisplay = memo(() => {
+  const { themeColor: themes } = useSelector((state) => state.themeColor);
+  const dark = themes === "dark";
+  
+  return (
+    <Box
+      sx={{
+        background: dark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.03)",
+        display: "flex",
+        mx: 2,
+        gap: 1.5,
+        borderRadius: "8px",
+        py: 1.5,
+        px: 3,
+        transition: "all 0.5s ease",
+        border: dark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid rgba(0, 0, 0, 0.05)",
+      }}
+    >
+      <Typography 
+        sx={{ 
+          fontSize: "0.75rem",
+          color: dark ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.7)",
+        }}
+      >
+        امروز :‌
+      </Typography>
+      <Typography 
+        sx={{ 
+          fontSize: "0.75rem",
+          color: dark ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.7)",
+        }}
+      >
+        {moment(new Date(), "YYYY-MM-DD HH:mm:ss").format("dddd")}
+      </Typography>
+      <Typography 
+        sx={{ 
+          fontSize: "0.75rem",
+          color: dark ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.7)",
+        }}
+      >
+        {new Intl.DateTimeFormat("fa-IR", {
+          month: "short",
+          day: "numeric",
+        }).format(new Date())}
+      </Typography>
+    </Box>
+  );
+});
+
+DateDisplay.displayName = 'DateDisplay';
+
+const PageTitle = memo(({
+  title,
+  backBtn = false,
+  broadCrumb = [],
+  buttonInfo = false,
+  hideTitle = true,
+  buttonInfo2 = false,
+  buttonInfo3 = false,
 }) => {
   const navigate = useNavigate();
-  const { themeColor } = useSelector((state) => state.themeColor);
-  const dark = themeColor === "dark";
+  const dispatch = useDispatch();
+  const [userInfo, setuserInfo] = useState({});
+  const [userAccess, setUserAccess] = useState("");
+  const { token } = useSelector((state) => state.user);
+  const { companyInfo } = useSelector((state) => state.relationals);
+  const isTablet = useMediaQuery("(min-width:668px)");
+  const [open, setOpen] = useState(false);
+  const { themeColor: themes } = useSelector((state) => state.themeColor);
+  const dark = themes === "dark";
+  const isDesktop = useMediaQuery("(min-width:900px)");
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("s");
+    if (storedUser) {
+      try {
+        setuserInfo(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Failed to parse user info:", error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userInfo?.accessId && !userAccess && token) {
+      axiosInstance
+        .get(
+          `${baseUrl}/${GET_ACCESS_PROFILE}?Page=1&Limit=2000`,
+          configReq(token)
+        )
+        .then((res) => {
+          const accessData = res?.data?.data?.find((item) => item?.id === userInfo?.accessId);
+          if (accessData) {
+            setUserAccess(accessData.title);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to fetch access profile:", err);
+        });
+    }
+  }, [userInfo?.accessId, userAccess, token]);
+
+  const handleOpenDrawer = useCallback(() => {
+    dispatch(openDrawer(true));
+  }, [dispatch]);
+
+  const handleSettingsOpen = useCallback(() => {
+    setOpen(true);
+  }, []);
+
+  const handleSettingsClose = useCallback(() => {
+    setOpen(false);
+  }, []);
 
   return (
-    <Box 
+    <Paper
+      elevation={0}
       className="page-title-container"
       sx={{
-        mb: 4,
-        p: 3,
-        borderRadius: "16px",
+        mb: 3,
+        p: 2.5,
+        borderRadius: "8px",
         background: dark 
-          ? "linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)"
-          : "linear-gradient(135deg, rgba(99, 102, 241, 0.02) 0%, rgba(139, 92, 246, 0.02) 100%)",
+          ? "rgba(255, 255, 255, 0.02)"
+          : "rgba(0, 0, 0, 0.01)",
         border: dark 
-          ? "1px solid rgba(255, 255, 255, 0.08)" 
-          : "1px solid rgba(0, 0, 0, 0.05)",
-        backdropFilter: "blur(10px)",
+          ? "1px solid rgba(255, 255, 255, 0.06)" 
+          : "1px solid rgba(0, 0, 0, 0.04)",
+        backdropFilter: "blur(8px)",
         boxShadow: dark
-          ? "0 8px 32px rgba(31, 38, 135, 0.1)"
-          : "0 4px 20px rgba(0, 0, 0, 0.05)",
-        transition: "all 0.3s ease",
+          ? "0 2px 8px rgba(0, 0, 0, 0.1)"
+          : "0 2px 8px rgba(0, 0, 0, 0.03)",
+        transition: "all 0.5s ease",
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
         "&:hover": {
           boxShadow: dark
-            ? "0 16px 48px rgba(31, 38, 135, 0.15)"
-            : "0 8px 30px rgba(0, 0, 0, 0.08)",
-          transform: "translateY(-2px)",
+            ? "0 4px 12px rgba(0, 0, 0, 0.15)"
+            : "0 4px 12px rgba(0, 0, 0, 0.05)",
         },
       }}
     >
-      {/* Breadcrumbs */}
-      {breadcrumbs.length > 0 && (
-        <Breadcrumbs 
-          separator={<NavigateNext fontSize="small" sx={{ color: "var(--sidebar-dark-text-secondary)" }} />}
-          sx={{ mb: 2 }}
-        >
-          <Link
-            underline="hover"
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              color: "var(--sidebar-dark-text-secondary)",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                color: "var(--gradient-primary-start)",
-              }
-            }}
-            onClick={() => navigate('/')}
-          >
-            <Home sx={{ mr: 0.5, fontSize: "1.2rem" }} />
-            خانه
-          </Link>
-          {breadcrumbs.map((crumb, index) => {
-            const isLast = index === breadcrumbs.length - 1;
-            return isLast ? (
-              <Typography 
-                key={crumb.title} 
-                sx={{ 
-                  color: "var(--sidebar-dark-text)",
-                  fontWeight: 600,
-                }}
-              >
-                {crumb.title}
-              </Typography>
-            ) : (
-              <Link
-                key={crumb.title}
-                underline="hover"
-                sx={{ 
-                  color: "var(--sidebar-dark-text-secondary)",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    color: "var(--gradient-primary-start)",
-                  }
-                }}
-                onClick={() => crumb.path && navigate(crumb.path)}
-              >
-                {crumb.title}
-              </Link>
-            );
-          })}
-        </Breadcrumbs>
+      {!isDesktop && (
+        <MenuIcon
+          sx={{
+            color: dark ? "rgba(255, 255, 255, 0.85)" : "rgba(0, 0, 0, 0.7)",
+            fontSize: "1.75rem",
+            cursor: "pointer",
+            transition: "all 0.5s ease",
+            "&:hover": {
+              color: dark ? "#fff" : "#000",
+              transform: "scale(1.05)",
+            },
+          }}
+          onClick={handleOpenDrawer}
+        />
       )}
-
-      {/* Title Section */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {Icon && (
-            <Box
-              sx={{
-                width: 56,
-                height: 56,
-                borderRadius: "16px",
-                background: "linear-gradient(135deg, var(--gradient-primary-start), var(--gradient-primary-end))",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 8px 24px rgba(99, 102, 241, 0.3)",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "rotate(10deg) scale(1.1)",
-                  boxShadow: "0 12px 32px rgba(99, 102, 241, 0.5)",
+      
+      {hideTitle && (
+        <Box
+          sx={{
+            overflow: "hidden",
+            maxWidth: "350px",
+            flexShrink: 0,
+          }}
+        >
+          <Box sx={{ minWidth: "max-content" }}>
+            <BroadCrumb
+              current={title}
+              links={[
+                {
+                  title: "داشبورد",
+                  path: "/",
                 },
+                ...broadCrumb,
+              ]}
+            />
+          </Box>
+        </Box>
+      )}
+      
+      <Box sx={{ flexGrow: 1 }} />
+      
+      <Box 
+        sx={{ 
+          display: { xs: "none", md: "flex" }, 
+          alignItems: "center", 
+          gap: 2,
+        }}
+      >
+        {companyInfo?.maintenanceMode && (
+          <Box 
+            sx={{
+              backgroundColor: "#ef4444",
+              borderRadius: "8px",
+              py: 1,
+              px: 2,
+              color: "#fff",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+            }}
+          >
+            حالت تعمیر فعال است
+          </Box>
+        )}
+  
+        <DateDisplay />
+        
+        <Box 
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: "8px",
+              border: dark 
+                ? "2px solid rgba(255, 255, 255, 0.1)"
+                : "2px solid rgba(0, 0, 0, 0.05)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.5s ease",
+              "&:hover": {
+                borderColor: dark 
+                  ? "rgba(255, 255, 255, 0.2)"
+                  : "rgba(0, 0, 0, 0.1)",
+              },
+            }}
+          >
+            <PersonOutlineIcon
+              sx={{ 
+                color: dark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.6)", 
+                fontSize: "1.25rem",
               }}
-            >
-              <Icon sx={{ color: "#fff", fontSize: "1.8rem" }} />
-            </Box>
-          )}
+            />
+          </Box>
 
           <Box>
             <Typography
-              variant="h4"
-              className={gradient ? "fancy-page-title" : ""}
               sx={{
-                fontWeight: 700,
-                fontSize: { xs: "1.5rem", md: "2rem" },
-                mb: subtitle ? 0.5 : 0,
-                ...(!gradient && {
-                  color: dark ? "#fff" : "#000",
-                }),
+                fontSize: "0.8rem",
+                color: dark ? "rgba(255, 255, 255, 0.9)" : "#1e40af",
+                fontWeight: 600,
+                lineHeight: 1.2,
               }}
             >
-              {title}
+              {userAccess || "ادمین"}
             </Typography>
-            {subtitle && (
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  color: "var(--sidebar-dark-text-secondary)",
-                  fontSize: "0.95rem",
-                }}
-              >
-                {subtitle}
-              </Typography>
-            )}
+            <Typography
+              sx={{
+                fontSize: "0.75rem",
+                color: dark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.6)",
+                lineHeight: 1.2,
+              }}
+            >
+              {userInfo?.fname} {userInfo?.lname}
+            </Typography>
           </Box>
+          
+          <SettingsOutlinedIcon
+            sx={{
+              color: dark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.6)",
+              fontSize: "1.25rem",
+              cursor: "pointer",
+              transition: "all 0.5s ease",
+              "&:hover": {
+                color: dark ? "#fff" : "#000",
+                transform: "rotate(90deg)",
+              },
+            }}
+            onClick={handleSettingsOpen}
+          />
         </Box>
-
-        {/* Actions */}
-        {actions && (
-          <Box sx={{ display: "flex", gap: 2 }}>
-            {actions}
-          </Box>
-        )}
       </Box>
-    </Box>
+      
+      <Drawer
+        anchor="left"
+        open={open}
+        onClose={handleSettingsClose}
+        className="leftDrawer"
+        sx={{
+          ".MuiPaper-root": {
+            borderRadius: "0 8px 8px 0",
+            transition: "transform 0.5s ease",
+          },
+        }}
+      >
+        <Settings onClose={handleSettingsClose} />
+      </Drawer>
+    </Paper>
   );
-};
+});
+
+PageTitle.displayName = 'PageTitle';
 
 export default PageTitle;

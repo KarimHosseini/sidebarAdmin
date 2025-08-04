@@ -59,7 +59,7 @@ const IOSSwitch = styled((props) => (
   "& .MuiSwitch-switchBase": {
     padding: 0,
     margin: 2,
-    transitionDuration: "300ms",
+              transitionDuration: "500ms",
     "&.Mui-checked": {
       transform: "translateX(25px)",
       color: "#fff",

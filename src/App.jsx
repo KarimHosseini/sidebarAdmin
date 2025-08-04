@@ -258,15 +258,15 @@ const App = () => {
       MuiButton: {
         styleOverrides: {
           root: {
-            borderRadius: "12px",
+            borderRadius: "8px",
             fontWeight: 600,
             textTransform: "none",
-            transition: "all 0.3s ease",
+            transition: "all 0.5s ease",
             boxShadow: "none",
             padding: "10px 24px",
             "&:hover": {
               boxShadow: "none",
-              transform: "translateY(-2px)",
+              transform: "translateY(-1px)",
             },
           },
           contained: ({ theme, ownerState }) => {
@@ -292,34 +292,34 @@ const App = () => {
             return {
               background: getGradientByColor(ownerState.color || "primary"),
               color: "#fff",
-              boxShadow: `0 4px 20px ${
+              boxShadow: `0 2px 8px ${
                 ownerState.color === "primary" 
-                  ? "rgba(99, 102, 241, 0.3)" 
+                  ? "rgba(99, 102, 241, 0.15)" 
                   : ownerState.color === "secondary"
-                  ? "rgba(139, 92, 246, 0.3)"
+                  ? "rgba(139, 92, 246, 0.15)"
                   : ownerState.color === "success"
-                  ? "rgba(16, 185, 129, 0.3)"
+                  ? "rgba(16, 185, 129, 0.15)"
                   : ownerState.color === "warning"
-                  ? "rgba(245, 158, 11, 0.3)"
+                  ? "rgba(245, 158, 11, 0.15)"
                   : ownerState.color === "error"
-                  ? "rgba(239, 68, 68, 0.3)"
-                  : "rgba(107, 114, 128, 0.3)"
+                  ? "rgba(239, 68, 68, 0.15)"
+                  : "rgba(107, 114, 128, 0.15)"
               }`,
               "&:hover": {
                 background: getGradientByColor(ownerState.color || "primary"),
-                filter: "brightness(1.1)",
-                boxShadow: `0 8px 30px ${
+                filter: "brightness(1.05)",
+                boxShadow: `0 4px 12px ${
                   ownerState.color === "primary" 
-                    ? "rgba(99, 102, 241, 0.5)" 
+                    ? "rgba(99, 102, 241, 0.25)" 
                     : ownerState.color === "secondary"
-                    ? "rgba(139, 92, 246, 0.5)"
+                    ? "rgba(139, 92, 246, 0.25)"
                     : ownerState.color === "success"
-                    ? "rgba(16, 185, 129, 0.5)"
+                    ? "rgba(16, 185, 129, 0.25)"
                     : ownerState.color === "warning"
-                    ? "rgba(245, 158, 11, 0.5)"
+                    ? "rgba(245, 158, 11, 0.25)"
                     : ownerState.color === "error"
-                    ? "rgba(239, 68, 68, 0.5)"
-                    : "rgba(107, 114, 128, 0.5)"
+                    ? "rgba(239, 68, 68, 0.25)"
+                    : "rgba(107, 114, 128, 0.25)"
                 }`,
               },
             };
@@ -353,8 +353,8 @@ const App = () => {
               "&:hover": {
                 backgroundColor: `${color}10`,
                 borderColor: color,
-                boxShadow: `0 0 0 3px ${color}30`,
-                transform: "translateY(-2px)",
+                boxShadow: `0 0 0 2px ${color}20`,
+                transform: "translateY(-1px)",
               },
             };
           },
@@ -392,11 +392,11 @@ const App = () => {
       MuiPaper: {
         styleOverrides: {
           root: {
-            borderRadius: "16px",
+            borderRadius: "8px",
             backgroundImage: "none",
             boxShadow: dark 
-              ? "0 8px 32px 0 rgba(31, 38, 135, 0.15)" 
-              : "0 4px 20px 0 rgba(0, 0, 0, 0.08)",
+              ? "0 2px 8px 0 rgba(0, 0, 0, 0.1)" 
+              : "0 2px 8px 0 rgba(0, 0, 0, 0.03)",
             border: dark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid rgba(0, 0, 0, 0.05)",
             backdropFilter: dark ? "blur(10px)" : "none",
             backgroundColor: dark ? "rgba(26, 26, 46, 0.8)" : "#fff",
@@ -413,9 +413,9 @@ const App = () => {
         styleOverrides: {
           root: {
             "& .MuiOutlinedInput-root": {
-              borderRadius: "12px",
-              transition: "all 0.3s ease",
-              backgroundColor: dark ? "rgba(255, 255, 255, 0.03)" : "#f7f7f7",
+              borderRadius: "8px",
+              transition: "all 0.5s ease",
+              backgroundColor: dark ? "rgba(255, 255, 255, 0.02)" : "rgba(0, 0, 0, 0.02)",
               "& fieldset": {
                 borderColor: dark ? "rgba(255, 255, 255, 0.1)" : "#e0e0e0",
                 transition: "all 0.3s ease",
@@ -444,7 +444,7 @@ const App = () => {
       MuiTableContainer: {
         styleOverrides: {
           root: {
-            borderRadius: "16px",
+            borderRadius: "8px",
             overflow: "hidden",
             backgroundColor: dark ? "rgba(255, 255, 255, 0.03)" : "#fff",
             border: dark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid rgba(0, 0, 0, 0.05)",
@@ -500,7 +500,7 @@ const App = () => {
             transition: "all 0.3s ease",
             "&:hover": {
               transform: "translateY(-1px)",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
             },
           },
           filled: {

@@ -145,12 +145,12 @@ const Cart = ({ item, index, justImage, data }) => {
         ":hover": {
           img: {
             transform: !justImage && "scale(1.1)",
-            transition: "all 300ms ease-in",
+            transition: "all 0.5s ease",
           },
         },
         img: {
           transform: "scale(1)",
-          transition: "all 300ms ease-in",
+                      transition: "all 0.5s ease",
         },
         /*       height:
           item?.possiton === 10 ||

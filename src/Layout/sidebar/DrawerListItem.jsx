@@ -173,7 +173,7 @@ const DrawerListItem = ({ item, viewALl, isOpen, setIsOpen, searchTerm }) => {
               isOpen === item.title && viewALl
                 ? "rotate(90deg)"
                 : "rotate(0deg)",
-            transition: "300ms all ease",
+                                transition: "all 0.5s ease",
             mr: 2,
             fontSize: "1rem",
           }}
@@ -389,7 +389,7 @@ const DrawerListItem2 = ({ item }) => {
                     ? "rgba(0, 0, 0)"
                     : "rgba(255, 255, 255, 0.8)",
                 transform: isOpen[index] ? "rotate(90deg)" : "rotate(0deg)",
-                transition: "300ms all ease",
+                transition: "all 0.5s ease",
                 mr: 2,
                 fontSize: "1rem",
               }}

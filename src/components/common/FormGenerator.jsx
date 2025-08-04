@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo, useCallback, useMemo } from "react";
 import { 
   Box, 
   Switch, 
@@ -34,7 +34,7 @@ import { Calendar } from "react-datepicker2";
 // Dynamic import for Monaco Editor
 const Editor = React.lazy(() => import('@monaco-editor/react'));
 
-const FormGenerator = ({ 
+const FormGenerator = memo(({ 
   fields = [], 
   initialData = {}, 
   onSubmit,
@@ -510,5 +510,9 @@ const FormGenerator = ({
     </Box>
   );
 };
+
+});
+
+FormGenerator.displayName = 'FormGenerator';
 
 export default FormGenerator; 

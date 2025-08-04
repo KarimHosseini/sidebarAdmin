@@ -16,80 +16,103 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import SmsOutlinedIcon from "@mui/icons-material/SmsOutlined";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import SyncAltOutlinedIcon from "@mui/icons-material/SyncAltOutlined";
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-const UsePermissons = () => {
-  const [headerMenu, setHeaderMenu] = useState([]);
 
+const UsePermissons = () => {
   const { userPermissions: userPermissionsSelector } = useSelector(
     (state) => state.relationals
   );
-  useEffect(() => {
-    var temp = [];
-    if (
-      userPermissionsSelector?.product?.view ||
-      userPermissionsSelector?.productProperties?.view ||
-      userPermissionsSelector?.attributeGroup?.view ||
-      userPermissionsSelector?.attributes?.view ||
-      userPermissionsSelector?.publicAttributes?.view ||
-      userPermissionsSelector?.brand?.view ||
-      userPermissionsSelector?.categories?.view ||
-      userPermissionsSelector?.productCardex?.view ||
-      userPermissionsSelector?.bundle?.view ||
-      userPermissionsSelector?.categoryAbilities?.view
-    ) {
+
+  // Memoize the entire menu structure to prevent recalculation on every render
+  const headerMenu = useMemo(() => {
+    const temp = [];
+    
+    // Helper function to check permissions more efficiently
+    const hasPermission = (path) => {
+      const parts = path.split('.');
+      let current = userPermissionsSelector;
+      for (const part of parts) {
+        if (!current || !current[part]) return false;
+        current = current[part];
+      }
+      return current;
+    };
+
+    // Helper function to add menu items conditionally
+    const addMenuItem = (condition, menuItem) => {
+      if (condition) {
+        temp.push(menuItem);
+      }
+    };
+
+    // Product Management Section
+    const productConditions = [
+      'product.view',
+      'productProperties.view',
+      'attributeGroup.view',
+      'attributes.view',
+      'publicAttributes.view',
+      'brand.view',
+      'categories.view',
+      'productCardex.view',
+      'bundle.view',
+      'categoryAbilities.view'
+    ];
+
+    if (productConditions.some(hasPermission)) {
       var subroutes3 = [];
       var accordian = [];
-      if (userPermissionsSelector?.product?.view) {
+      if (hasPermission('product.view')) {
         subroutes3.push({
           name: "محصولات",
           path: "/products",
         });
       }
-      if (userPermissionsSelector?.productProperties?.view) {
+      if (hasPermission('productProperties.view')) {
         subroutes3.push({
           name: "لیست کالاها",
           path: "/properties",
         });
       }
-      if (userPermissionsSelector?.bundle?.view) {
+      if (hasPermission('bundle.view')) {
         subroutes3.push({
           name: "محصولات تجمیعی",
           path: "/groupProduct",
         });
       }
-      if (userPermissionsSelector?.attributeGroup?.view) {
+      if (hasPermission('attributeGroup.view')) {
         accordian.push({
           name: "گروه ویژگی ها",
           path: "/attribute-groups",
         });
       }
-      if (userPermissionsSelector?.attributes?.view) {
+      if (hasPermission('attributes.view')) {
         accordian.push({
           name: "ویژگی ها",
           path: "/attributes",
         });
       }
-      if (userPermissionsSelector?.publicAttributes?.view) {
+      if (hasPermission('publicAttributes.view')) {
         accordian.push({
           name: "ویژگی های عمومی",
           path: "/public-attributes",
         });
       }
-      if (userPermissionsSelector?.brand?.view) {
+      if (hasPermission('brand.view')) {
         subroutes3.push({
           name: "برند ها",
           path: "/brands",
         });
       }
-      if (userPermissionsSelector?.categories?.view) {
+      if (hasPermission('categories.view')) {
         subroutes3.push({
           name: "دسته بندی ها",
           path: "/categories",
         });
       }
 
-      if (userPermissionsSelector?.categoryAbilities?.view) {
+      if (hasPermission('categoryAbilities.view')) {
         subroutes3.push({
           name: "توضیحات وندور",
           path: "/info-groups",
@@ -122,38 +145,38 @@ const UsePermissons = () => {
       }
     }
     if (
-      userPermissionsSelector?.shippingSetting?.view ||
-      userPermissionsSelector?.shippingCompany?.view ||
-      userPermissionsSelector?.packaging?.view ||
-      userPermissionsSelector?.shippingClass?.view ||
-      userPermissionsSelector?.city?.view
+      hasPermission('shippingSetting.view') ||
+      hasPermission('shippingCompany.view') ||
+      hasPermission('packaging.view') ||
+      hasPermission('shippingClass.view') ||
+      hasPermission('city.view')
     ) {
       var subroutesSending = [];
-      if (userPermissionsSelector?.shippingCompany?.view) {
+      if (hasPermission('shippingCompany.view')) {
         subroutesSending.push({
           name: "شرکتهای حمل",
           path: "/shipping-companies",
         });
       }
-      if (userPermissionsSelector?.shippingClass?.view) {
+      if (hasPermission('shippingClass.view')) {
         subroutesSending.push({
           name: "کلاس های حمل و نقل ",
           path: "/shippingClass",
         });
       }
-      if (userPermissionsSelector?.packaging?.view) {
+      if (hasPermission('packaging.view')) {
         subroutesSending.push({
           name: "کلاس بسته بندی حمل و نقل ",
           path: "/packaging",
         });
       }
-      if (userPermissionsSelector?.shippingSetting?.view) {
+      if (hasPermission('shippingSetting.view')) {
         subroutesSending.push({
           name: "  تنظیمات ارسال کالا ",
           path: "/shippingSetting",
         });
       }
-      if (userPermissionsSelector?.city?.view) {
+      if (hasPermission('city.view')) {
         subroutesSending.push({
           name: "  شهر ها",
           path: "/citiies",
@@ -166,7 +189,7 @@ const UsePermissons = () => {
         subroutes: subroutesSending,
       });
     }
-    if (userPermissionsSelector?.insurance?.view) {
+    if (hasPermission('insurance.view')) {
       temp.push({
         title: "خدمات ",
         subroutes: false,
@@ -175,24 +198,24 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.user?.view ||
-      userPermissionsSelector?.accessProfile?.view ||
-      userPermissionsSelector?.groupUser?.view
+      hasPermission('user.view') ||
+      hasPermission('accessProfile.view') ||
+      hasPermission('groupUser.view')
     ) {
       var subroutesU = [];
-      if (userPermissionsSelector?.user?.view) {
+      if (hasPermission('user.view')) {
         subroutesU.push({
           name: "کاربران",
           path: "/users",
         });
       }
-      if (userPermissionsSelector?.accessProfile?.view) {
+      if (hasPermission('accessProfile.view')) {
         subroutesU.push({
           name: "نقش ها",
           path: "/permisions",
         });
       }
-      if (userPermissionsSelector?.groupUser?.view) {
+      if (hasPermission('groupUser.view')) {
         subroutesU.push({
           name: "  گروه های کاربران",
           path: "/userGroup",
@@ -205,38 +228,38 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.wallet?.view ||
-      userPermissionsSelector?.walletPaymentAdminCredit?.insert ||
-      userPermissionsSelector?.walletPaymentRefund?.insert ||
-      userPermissionsSelector?.walletPayment?.view ||
-      userPermissionsSelector?.ReportWalletBalance?.view
+      hasPermission('wallet.view') ||
+      hasPermission('walletPaymentAdminCredit.insert') ||
+      hasPermission('walletPaymentRefund.insert') ||
+      hasPermission('walletPayment.view') ||
+      hasPermission('ReportWalletBalance.view')
     ) {
       var subroutesW = [];
-      if (userPermissionsSelector?.wallet?.view) {
+      if (hasPermission('wallet.view')) {
         subroutesW.push({
           name: " گزارش کیف پول سایت",
           path: "/wallet",
         });
       }
-      if (userPermissionsSelector?.walletPaymentAdminCredit?.insert) {
+      if (hasPermission('walletPaymentAdminCredit.insert')) {
         subroutesW.push({
           name: " درخواست های شارژ  کیف",
           path: "/ChargingWallet",
         });
       }
-      if (userPermissionsSelector?.walletPaymentRefund?.insert) {
+      if (hasPermission('walletPaymentRefund.insert')) {
         subroutesW.push({
           name: " در خواست های عودت از کیف",
           path: "/withdrawWallet",
         });
       }
-      if (userPermissionsSelector?.walletPayment?.view) {
+      if (hasPermission('walletPayment.view')) {
         subroutesW.push({
           name: "تایید در خواست های کیف  پول  سایت",
           path: "/requestWallet",
         });
       }
-      if (userPermissionsSelector?.ReportWalletBalance?.view) {
+      if (hasPermission('ReportWalletBalance.view')) {
         subroutesW.push({
           name: " گزارش مانده کيف پول ",
           path: "/reportWalletBalance",
@@ -249,38 +272,38 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.facilityWallet?.view ||
-      userPermissionsSelector?.facilityWalletPaymentAdminCredit?.insert ||
-      userPermissionsSelector?.facilityWalletPaymentRefund?.insert ||
-      userPermissionsSelector?.facilityWalletPayment?.view ||
-      userPermissionsSelector?.reportfacilitywalletballance?.view
+      hasPermission('facilityWallet.view') ||
+      hasPermission('facilityWalletPaymentAdminCredit.insert') ||
+      hasPermission('facilityWalletPaymentRefund.insert') ||
+      hasPermission('facilityWalletPayment.view') ||
+      hasPermission('reportfacilitywalletballance.view')
     ) {
       var subroutesWF = [];
-      if (userPermissionsSelector?.facilityWallet?.view) {
+      if (hasPermission('facilityWallet.view')) {
         subroutesWF.push({
           name: " گزارش کیف پول تسهیلاتی",
           path: "/facilityWallet",
         });
       }
-      if (userPermissionsSelector?.facilityWalletPaymentAdminCredit?.insert) {
+      if (hasPermission('facilityWalletPaymentAdminCredit.insert')) {
         subroutesWF.push({
           name: " درخواست شارژ  کیف تسهیلاتی",
           path: "/ChargingFacilityWWallet",
         });
       }
-      if (userPermissionsSelector?.facilityWalletPaymentRefund?.insert) {
+      if (hasPermission('facilityWalletPaymentRefund.insert')) {
         subroutesWF.push({
           name: " در خواست عودت  کیف تسهیلاتی",
           path: "/withdrawFacilityWallet",
         });
       }
-      if (userPermissionsSelector?.facilityWalletPayment?.view) {
+      if (hasPermission('facilityWalletPayment.view')) {
         subroutesWF.push({
           name: " در خواست های کیف  پول  تسهیلاتی",
           path: "/requestFacilityWallet",
         });
       }
-      if (userPermissionsSelector?.reportfacilitywalletballance?.view) {
+      if (hasPermission('reportfacilitywalletballance.view')) {
         subroutesWF.push({
           name: " گزارش مانده کيف پول  تسهیلاتی",
           path: "/reportFacilityWalletBalance",
@@ -292,7 +315,7 @@ const UsePermissons = () => {
         subroutes: subroutesWF,
       });
     }
-    if (userPermissionsSelector?.orders?.view) {
+    if (hasPermission('orders.view')) {
       temp.push({
         title: "سفارشات",
         subroutes: false,
@@ -308,15 +331,15 @@ const UsePermissons = () => {
         icon: <SupportAgentIcon fontSize="inherit" />,
       });
     } */
-    if (userPermissionsSelector?.refundBank?.view) {
+    if (hasPermission('refundBank.view')) {
       var accordians = [];
-      if (userPermissionsSelector?.refundBank?.view) {
+      if (hasPermission('refundBank.view')) {
         accordians.push({
           name: " برگشت پول ",
           path: "/refund",
         });
       }
-      if (userPermissionsSelector?.paymentResult?.view) {
+      if (hasPermission('paymentResult.view')) {
         accordians.push({
           name: " تراکنش های بانکی",
           path: "/paymentResult",
@@ -329,68 +352,68 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.productCardex?.view ||
-      userPermissionsSelector?.Chart1?.view ||
-      userPermissionsSelector?.ReportSumGateway?.view ||
-      userPermissionsSelector?.discountTransaction?.view ||
-      userPermissionsSelector?.ReportTransactions?.view ||
-      userPermissionsSelector?.ReportReserved?.view ||
-      userPermissionsSelector?.ReportInvoice?.view ||
-      userPermissionsSelector?.ReportDisaggregatedDailySales?.view
+      hasPermission('productCardex.view') ||
+      hasPermission('Chart1.view') ||
+      hasPermission('ReportSumGateway.view') ||
+      hasPermission('discountTransaction.view') ||
+      hasPermission('ReportTransactions.view') ||
+      hasPermission('ReportReserved.view') ||
+      hasPermission('ReportInvoice.view') ||
+      hasPermission('ReportDisaggregatedDailySales.view')
     ) {
       var accordian1 = [];
 
-      if (userPermissionsSelector?.productCardex?.view) {
+      if (hasPermission('productCardex.view')) {
         accordian1.push({
           name: " گزارش کاردکس کالا ",
           path: "/productCardex",
         });
       }
 
-      if (userPermissionsSelector?.ReportTransactions?.view) {
+      if (hasPermission('ReportTransactions.view')) {
         accordian1.push({
           name: "گزارش تراکنش",
           path: "/reportTransaction",
         });
       }
-      if (userPermissionsSelector?.discountTransaction?.view) {
+      if (hasPermission('discountTransaction.view')) {
         accordian1.push({
           name: " گزارشات تخفیف",
           path: "/reportDiscount",
         });
       }
 
-      if (userPermissionsSelector?.ReportSumGateway?.view) {
+      if (hasPermission('ReportSumGateway.view')) {
         accordian1.push({
           name: " گزارش تجمیعی درگاه  ",
           path: "/reportSumGateway",
         });
       }
-      if (userPermissionsSelector?.ReportInvoice?.view) {
+      if (hasPermission('ReportInvoice.view')) {
         accordian1.push({
           name: " گزارش ریز فاکتور فروش ",
           path: "/reportInvoice",
         });
       }
-      if (userPermissionsSelector?.Chart1?.view) {
+      if (hasPermission('Chart1.view')) {
         accordian1.push({
           name: " گزارش سفارش بصورت چارت          ",
           path: "/reports",
         });
       }
-      if (userPermissionsSelector?.ReportDisaggregatedDailySales?.view) {
+      if (hasPermission('ReportDisaggregatedDailySales.view')) {
         accordian1.push({
           name: " گزارشات فروش روزانه تفکیک شده",
           path: "/reportDaily",
         });
       }
-      if (userPermissionsSelector?.ReportSumGatewayByUser?.view) {
+      if (hasPermission('ReportSumGatewayByUser.view')) {
         accordian1.push({
           name: " گزارشات درگاه به تفکيک کاربر",
           path: "/reportSumGatewayByUser",
         });
       }
-      if (userPermissionsSelector?.ReportReserved?.view) {
+      if (hasPermission('ReportReserved.view')) {
         accordian1.push({
           name: " گزارش رزرو محصول ",
           path: "/reportReserved",
@@ -404,33 +427,33 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.ReportShipment?.view ||
-      userPermissionsSelector?.shippingCostReportSummery?.view ||
-      userPermissionsSelector?.shippingCostReport?.view ||
-      userPermissionsSelector?.tipax?.view
+      hasPermission('ReportShipment.view') ||
+      hasPermission('shippingCostReportSummery.view') ||
+      hasPermission('shippingCostReport.view') ||
+      hasPermission('tipax.view')
     ) {
       var accordian2 = [];
 
-      if (userPermissionsSelector?.ReportShipment?.view) {
+      if (hasPermission('ReportShipment.view')) {
         accordian2.push({
           name: " گزارش وضعیت ارسالی ",
           path: "/reportShipment",
         });
       }
 
-      if (userPermissionsSelector?.shippingCostReport?.view) {
+      if (hasPermission('shippingCostReport.view')) {
         accordian2.push({
           name: "گزارشات هزینه های حمل و نقل          ",
           path: "/shippingCostReport",
         });
       }
-      if (userPermissionsSelector?.shippingCostReportSummery?.view) {
+      if (hasPermission('shippingCostReportSummery.view')) {
         accordian2.push({
           name: " گزارش تجمیعی شرکت های حمل",
           path: "/shippingCostReportSummery",
         });
       }
-      if (userPermissionsSelector?.tipax?.view) {
+      if (hasPermission('tipax.view')) {
         accordian2.push({
           name: " مشاهده سفارشات به تیپاکس",
           path: "/tipax",
@@ -443,10 +466,10 @@ const UsePermissons = () => {
       });
     }
 
-    if (userPermissionsSelector?.planTransaction?.view) {
+    if (hasPermission('planTransaction.view')) {
       var accordian4 = [];
 
-      if (userPermissionsSelector?.planTransaction?.view) {
+      if (hasPermission('planTransaction.view')) {
         accordian4.push({
           name: "  گزارشات طرح بانک آینده ",
           path: "/reportPlan",
@@ -459,10 +482,10 @@ const UsePermissons = () => {
         subroutes: accordian4,
       });
     }
-    if (userPermissionsSelector?.ReportLoan?.view) {
+    if (hasPermission('ReportLoan.view')) {
       var accordian3 = [];
 
-      if (userPermissionsSelector?.ReportLoan?.view) {
+      if (hasPermission('ReportLoan.view')) {
         accordian3.push({
           name: " گزارشات بازدید تسهیلات لندینگ",
           path: "/reportLoan",
@@ -475,10 +498,10 @@ const UsePermissons = () => {
         subroutes: accordian3,
       });
     }
-    if (userPermissionsSelector?.insurancePurchaseRecords?.view) {
+    if (hasPermission('insurancePurchaseRecords.view')) {
       var accordian5 = [];
 
-      if (userPermissionsSelector?.insurancePurchaseRecords?.view) {
+      if (hasPermission('insurancePurchaseRecords.view')) {
         accordian5.push({
           name: " گزارش سوابق بیمه ",
           path: "/insurancePurchaseRecord",
@@ -492,88 +515,88 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.CooperationRequest?.view ||
-      userPermissionsSelector?.AgentRefahLoanSummery?.view ||
-      userPermissionsSelector?.singleLoanAgentSummery?.view ||
-      userPermissionsSelector?.RefahInstallment?.view ||
-      userPermissionsSelector?.ReportFinancierInstallment?.view ||
-      userPermissionsSelector?.ReportOverdueInstallmentsSummary?.view ||
-      userPermissionsSelector?.UserLoanRequest?.view ||
-      userPermissionsSelector?.ReportProductDepot?.view ||
-      userPermissionsSelector?.reportLoanDetailByAgent?.view ||
-      userPermissionsSelector?.reportLoanDetailByUser?.view ||
-      userPermissionsSelector?.reportReferralOrders?.view ||
-      userPermissionsSelector?.agentWalletRequest?.view
+      hasPermission('CooperationRequest.view') ||
+      hasPermission('AgentRefahLoanSummery.view') ||
+      hasPermission('singleLoanAgentSummery.view') ||
+      hasPermission('RefahInstallment.view') ||
+      hasPermission('ReportFinancierInstallment.view') ||
+      hasPermission('ReportOverdueInstallmentsSummary.view') ||
+      hasPermission('UserLoanRequest.view') ||
+      hasPermission('ReportProductDepot.view') ||
+      hasPermission('reportLoanDetailByAgent.view') ||
+      hasPermission('reportLoanDetailByUser.view') ||
+      hasPermission('reportReferralOrders.view') ||
+      hasPermission('agentWalletRequest.view')
     ) {
       var subroutes5 = [];
-      if (userPermissionsSelector?.CooperationRequest?.view) {
+      if (hasPermission('CooperationRequest.view')) {
         subroutes5.push({
           name: " گزارش درخواست نمايندگي ",
           path: "/CooperationRequest",
         });
       }
-      if (userPermissionsSelector?.AgentRefahLoanSummery?.view) {
+      if (hasPermission('AgentRefahLoanSummery.view')) {
         subroutes5.push({
           name: " گزارش تسویه نماینده ",
           path: "/AgentSummary",
         });
       }
-      if (userPermissionsSelector?.singleLoanAgentSummery?.view) {
+      if (hasPermission('singleLoanAgentSummery.view')) {
         subroutes5.push({
           name: "گزارش تسویه تسهیلات تکی   نماینده ها ",
           path: "/singleLoanAgentTurnover",
         });
       }
-      if (userPermissionsSelector?.RefahInstallment?.view) {
+      if (hasPermission('RefahInstallment.view')) {
         subroutes5.push({
           name: " گزارش اقساط رفاه ",
           path: "/refahInstallment",
         });
       }
-      if (userPermissionsSelector?.ReportFinancierInstallment?.view) {
+      if (hasPermission('ReportFinancierInstallment.view')) {
         subroutes5.push({
           name: " گزارش تامین کننده مالی",
           path: "/reportFinancierInstallment",
         });
       }
-      if (userPermissionsSelector?.ReportOverdueInstallmentsSummary?.view) {
+      if (hasPermission('ReportOverdueInstallmentsSummary.view')) {
         subroutes5.push({
           name: " گزارش تجمیعی اقساط رفاه ",
           path: "/reportOverdueInstallmentsSummary",
         });
       }
-      if (userPermissionsSelector?.UserLoanRequest?.view) {
+      if (hasPermission('UserLoanRequest.view')) {
         subroutes5.push({
           name: "گزارش درخواست وام",
           path: "/userLoanRequest",
         });
       }
-      if (userPermissionsSelector?.ReportProductDepot?.view) {
+      if (hasPermission('ReportProductDepot.view')) {
         subroutes5.push({
           name: " گزارش موجودی انبار",
           path: "/reportProductDepot",
         });
       }
-      if (userPermissionsSelector?.reportReferralOrders?.view) {
+      if (hasPermission('reportReferralOrders.view')) {
         subroutes5.push({
           name: "  گزارش نماینده فروش",
           path: "/reportReferralOrders",
         });
       }
 
-      if (userPermissionsSelector?.reportLoanDetailByAgent?.view) {
+      if (hasPermission('reportLoanDetailByAgent.view')) {
         subroutes5.push({
           name: "  گزارش تسهیلات بر اساس نماینده",
           path: "/reportLoanDetailByAgent",
         });
       }
-      if (userPermissionsSelector?.reportLoanDetailByUser?.view) {
+      if (hasPermission('reportLoanDetailByUser.view')) {
         subroutes5.push({
           name: "   گزارش تسهیلات بر اساس کاربر  ",
           path: "/reportLoanDetailByUser",
         });
       }
-      if (userPermissionsSelector?.agentWalletRequest?.view) {
+      if (hasPermission('agentWalletRequest.view')) {
         subroutes5.push({
           name: "  گزارش عودت نماینده",
           path: "/agentWalletRequest",
@@ -587,38 +610,38 @@ const UsePermissons = () => {
     }
 
     if (
-      userPermissionsSelector?.LoanSettings?.view ||
-      userPermissionsSelector?.RefahLoans?.view ||
-      userPermissionsSelector?.singleLoan?.view ||
-      userPermissionsSelector?.Financier?.view ||
-      userPermissionsSelector?.guarantor?.view
+      hasPermission('LoanSettings.view') ||
+      hasPermission('RefahLoans.view') ||
+      hasPermission('singleLoan.view') ||
+      hasPermission('Financier.view') ||
+      hasPermission('guarantor.view')
     ) {
       var subroutes7 = [];
-      if (userPermissionsSelector?.LoanSettings?.view) {
+      if (hasPermission('LoanSettings.view')) {
         subroutes7.push({
           name: "تنظیمات تسهیلات ",
           path: "/facilitySetting",
         });
       }
-      if (userPermissionsSelector?.RefahLoans?.view) {
+      if (hasPermission('RefahLoans.view')) {
         subroutes7.push({
           name: "تسهیلات دارای تضمین کننده          ",
           path: "/betaloan",
         });
       }
-      if (userPermissionsSelector?.singleLoan?.view) {
+      if (hasPermission('singleLoan.view')) {
         subroutes7.push({
           name: " تسهیلات فاقد تضمین کننده         ",
           path: "/singleLoan",
         });
       }
-      if (userPermissionsSelector?.Financier?.view) {
+      if (hasPermission('Financier.view')) {
         subroutes7.push({
           name: "تامین کننده مالی",
           path: "/financier",
         });
       }
-      if (userPermissionsSelector?.guarantor?.view) {
+      if (hasPermission('guarantor.view')) {
         subroutes7.push({
           name: "  تضمین کننده",
           path: "/guarantor",
@@ -631,26 +654,26 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.planLoanDocument?.view ||
-      userPermissionsSelector?.LoanSettings?.view ||
-      userPermissionsSelector?.planLoanRequest?.view
+      hasPermission('planLoanDocument.view') ||
+      hasPermission('LoanSettings.view') ||
+      hasPermission('planLoanRequest.view')
     ) {
       var subroutes7 = [];
 
-      if (userPermissionsSelector?.planLoanRequest?.view) {
+      if (hasPermission('planLoanRequest.view')) {
         subroutes7.push({
           name: "تسهیلات طرح بانک آینده          ",
           path: "/plan-loan",
         });
       }
 
-      if (userPermissionsSelector?.planLoanDocument?.view) {
+      if (hasPermission('planLoanDocument.view')) {
         subroutes7.push({
           name: "گزارش سابقه تسهیلات طرح بانک آینده ",
           path: "/planDocument",
         });
       }
-      if (userPermissionsSelector?.planLoanSetting?.view) {
+      if (hasPermission('planLoanSetting.view')) {
         subroutes7.push({
           name: "تنظیمات تسهیلات طرح بانک آینده ",
           path: "/loan-setting",
@@ -664,19 +687,19 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.loanRequest?.view ||
-      userPermissionsSelector?.leasing?.view
+      hasPermission('loanRequest.view') ||
+      hasPermission('leasing.view')
     ) {
       var subroutes7 = [];
 
-      if (userPermissionsSelector?.loanRequest?.view) {
+      if (hasPermission('loanRequest.view')) {
         subroutes7.push({
           name: " درخواست تسهیلات لیزینگ ",
           path: "/facilites",
         });
       }
 
-      if (userPermissionsSelector?.leasing?.view) {
+      if (hasPermission('leasing.view')) {
         subroutes7.push({
           name: "  لیزینگ ها   ",
           path: "/leasing",
@@ -691,74 +714,74 @@ const UsePermissons = () => {
     }
 
     if (
-      userPermissionsSelector?.smsCenter?.view ||
-      userPermissionsSelector?.sms?.view ||
-      userPermissionsSelector?.smslog?.view ||
-      userPermissionsSelector?.smsLogAccess?.view ||
-      userPermissionsSelector?.emailLog?.view ||
-      userPermissionsSelector?.inbox?.view ||
-      userPermissionsSelector?.userNotification?.view ||
-      userPermissionsSelector?.adminNotification?.view ||
-      userPermissionsSelector?.department?.view ||
-      userPermissionsSelector?.smsProvider?.view
+      hasPermission('smsCenter.view') ||
+      hasPermission('sms.view') ||
+      hasPermission('smslog.view') ||
+      hasPermission('smsLogAccess.view') ||
+      hasPermission('emailLog.view') ||
+      hasPermission('inbox.view') ||
+      hasPermission('userNotification.view') ||
+      hasPermission('adminNotification.view') ||
+      hasPermission('department.view') ||
+      hasPermission('smsProvider.view')
     ) {
       var subroutesSms = [];
-      if (userPermissionsSelector?.smslog?.view) {
+      if (hasPermission('smslog.view')) {
         subroutesSms.push({
           name: " پیامک های ارسال شده",
           path: "/smslog",
         });
       }
-      if (userPermissionsSelector?.adminNotification?.view) {
+      if (hasPermission('adminNotification.view')) {
         subroutesSms.push({
           name: "نوتيفيکيشن های ارسال شده در پنل ادمین",
           path: "/adminNotifications",
         });
       }
-      if (userPermissionsSelector?.userNotification?.view) {
+      if (hasPermission('userNotification.view')) {
         subroutesSms.push({
           name: "  اطلاع رسانی های ارسال شده از ادمین",
           path: "/userNotification",
         });
       }
-      if (userPermissionsSelector?.emailLog?.view) {
+      if (hasPermission('emailLog.view')) {
         subroutesSms.push({
           name: "    ایمیل های ارسال شده",
           path: "/emails",
         });
       }
 
-      if (userPermissionsSelector?.inbox?.view) {
+      if (hasPermission('inbox.view')) {
         subroutesSms.push({
           name: "   صندوق پیام های دریافتی          ",
           path: "/inbox",
         });
       }
-      if (userPermissionsSelector?.smsCenter?.view) {
+      if (hasPermission('smsCenter.view')) {
         subroutesSms.push({
           name: "تنظیمات ارسال پیام ها به ادمین",
           path: "/sms",
         });
       }
-      if (userPermissionsSelector?.sms?.view) {
+      if (hasPermission('sms.view')) {
         subroutesSms.push({
           name: " مدیریت متون پیام ها",
           path: "/smsContent",
         });
       }
-      if (userPermissionsSelector?.smsLogAccess?.view) {
+      if (hasPermission('smsLogAccess.view')) {
         subroutesSms.push({
           name: "  دسترسی نمایش پیام های ادمین",
           path: "/smsAccess",
         });
       }
-      if (userPermissionsSelector?.department?.view) {
+      if (hasPermission('department.view')) {
         subroutesSms.push({
           name: " دپارتمان",
           path: "/department",
         });
       }
-      if (userPermissionsSelector?.smsProvider?.view) {
+      if (hasPermission('smsProvider.view')) {
         subroutesSms.push({
           name: "سرویس دهنده های اس ام اس ",
           path: "/smsProvider",
@@ -781,32 +804,32 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.discountCode?.view ||
-      userPermissionsSelector?.company?.view ||
-      userPermissionsSelector?.plan?.view ||
-      userPermissionsSelector?.discount?.view
+      hasPermission('discountCode.view') ||
+      hasPermission('company.view') ||
+      hasPermission('plan.view') ||
+      hasPermission('discount.view')
     ) {
       var subroutes9 = [];
-      if (userPermissionsSelector?.discountCode?.view) {
+      if (hasPermission('discountCode.view')) {
         subroutes9.push({
           name: "  کد تخفیف محصول",
           path: "/discounts",
         });
       }
-      if (userPermissionsSelector?.company?.view) {
+      if (hasPermission('company.view')) {
         subroutes9.push({
           name: "  شرکت / سازمان",
           path: "/company",
         });
       }
 
-      if (userPermissionsSelector?.plan?.view) {
+      if (hasPermission('plan.view')) {
         subroutes9.push({
           name: "  طرح فروش و تخفیفات",
           path: "/plan",
         });
       }
-      if (userPermissionsSelector?.discount?.view) {
+      if (hasPermission('discount.view')) {
         subroutes9.push({
           name: "لیست تخفیف",
           path: "/discount-plan",
@@ -820,17 +843,17 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.productScores?.view ||
-      userPermissionsSelector?.scoreParams?.view
+      hasPermission('productScores.view') ||
+      hasPermission('scoreParams.view')
     ) {
       var subroutes12 = [];
-      if (userPermissionsSelector?.productScores?.view) {
+      if (hasPermission('productScores.view')) {
         subroutes12.push({
           name: " نظرات محصول",
           path: "/comments",
         });
       }
-      if (userPermissionsSelector?.scoreParams?.view) {
+      if (hasPermission('scoreParams.view')) {
         subroutes12.push({
           name: " تنظیمات امتیاز",
           path: "/commentParameter",
@@ -844,9 +867,9 @@ const UsePermissons = () => {
       });
     }
 
-    if (userPermissionsSelector?.supplier?.view) {
+    if (hasPermission('supplier.view')) {
       var subroutes6 = [];
-      if (userPermissionsSelector?.supplier?.view) {
+      if (hasPermission('supplier.view')) {
         subroutes6.push({
           name: "تامین کنندگان ",
           path: "/suppliers",
@@ -860,33 +883,33 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.blog?.view ||
-      userPermissionsSelector?.blogTag?.view ||
-      userPermissionsSelector?.blogCategory?.view ||
-      userPermissionsSelector?.blogPoint?.view ||
-      userPermissionsSelector?.blogRedirect?.view
+      hasPermission('blog.view') ||
+      hasPermission('blogTag.view') ||
+      hasPermission('blogCategory.view') ||
+      hasPermission('blogPoint.view') ||
+      hasPermission('blogRedirect.view')
     ) {
       var subroutesB = [];
-      if (userPermissionsSelector?.blog?.view) {
+      if (hasPermission('blog.view')) {
         subroutesB.push({
           name: "بلاگ",
           path: "/blog",
         });
       }
 
-      if (userPermissionsSelector?.blogCategory?.view) {
+      if (hasPermission('blogCategory.view')) {
         subroutesB.push({
           name: "  دسته بندی بلاگ  ",
           path: "/blog-categroy",
         });
       }
-      if (userPermissionsSelector?.blogTag?.view) {
+      if (hasPermission('blogTag.view')) {
         subroutesB.push({
           name: "   تگ های بلاگ  ",
           path: "/blog-tag",
         });
       }
-      if (userPermissionsSelector?.blogPoint?.view) {
+      if (hasPermission('blogPoint.view')) {
         subroutesB.push({
           name: "  نظرات بلاگ ",
           path: "/blog-point",
@@ -899,7 +922,7 @@ const UsePermissons = () => {
         subroutes: subroutesB,
       });
     }
-    if (userPermissionsSelector?.gallery?.view) {
+    if (hasPermission('gallery.view')) {
       temp.push({
         title: "گالری تصاویر",
         subroutes: false,
@@ -908,18 +931,18 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.showcases?.view ||
-      userPermissionsSelector?.menu?.view ||
-      userPermissionsSelector?.siteNotification?.view
+      hasPermission('showcases.view') ||
+      hasPermission('menu.view') ||
+      hasPermission('siteNotification.view')
     ) {
       var accordian2 = [];
-      if (userPermissionsSelector?.menu?.view) {
+      if (hasPermission('menu.view')) {
         accordian2.push({
           name: "منو های ناوبری          ",
           path: "/menu",
         });
       }
-      if (userPermissionsSelector?.showcases?.view) {
+      if (hasPermission('showcases.view')) {
         accordian2.push({
           name: "شوکیس ها ( ویترین ها )          ",
           path: "/showcases",
@@ -932,7 +955,7 @@ const UsePermissons = () => {
         });
       } */
 
-      if (userPermissionsSelector?.siteNotification?.view) {
+      if (hasPermission('siteNotification.view')) {
         accordian2.push({
           name: "نوتيفيکيشن های هدر سایت          ",
           path: "/notification",
@@ -946,32 +969,32 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.seo?.view ||
-      userPermissionsSelector?.seoTag?.view ||
-      userPermissionsSelector?.redirect?.view
+      hasPermission('seo.view') ||
+      hasPermission('seoTag.view') ||
+      hasPermission('redirect.view')
     ) {
       var accordian2 = [];
 
-      if (userPermissionsSelector?.seoTag?.view) {
+      if (hasPermission('seoTag.view')) {
         accordian2.push({
           name: "تگ سئو ",
           path: "/seoTag",
         });
       }
 
-      if (userPermissionsSelector?.seo?.view) {
+      if (hasPermission('seo.view')) {
         accordian2.push({
           name: "سئو شوکیس و استاتیک",
           path: "/seo",
         });
       }
-      if (userPermissionsSelector?.redirect?.view) {
+      if (hasPermission('redirect.view')) {
         accordian2.push({
           name: "ریدایرکت ها",
           path: "/redirectUrl",
         });
       }
-      if (userPermissionsSelector?.staticPages?.view) {
+      if (hasPermission('staticPages.view')) {
         accordian2.push({
           name: "صفحه های استاتیک",
           path: "/staticPage",
@@ -984,24 +1007,24 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.accountingArpaCategroty?.view ||
-      userPermissionsSelector?.accountingArpaSetting?.view
+      hasPermission('accountingArpaCategroty.view') ||
+      hasPermission('accountingArpaSetting.view')
     ) {
       var accordian21 = [];
 
-      if (userPermissionsSelector?.accountingArpaCategroty?.view) {
+      if (hasPermission('accountingArpaCategroty.view')) {
         accordian21.push({
           name: "تنظیمات دسته بندی ارپا",
           path: "/accountingArpaCategroty",
         });
       }
-      if (userPermissionsSelector?.accountingArpaSetting?.view) {
+      if (hasPermission('accountingArpaSetting.view')) {
         accordian21.push({
           name: "تنظیمات حسابداری",
           path: "/accountingSetting",
         });
       }
-      if (userPermissionsSelector?.accountingProductSyncLogError?.view) {
+      if (hasPermission('accountingProductSyncLogError.view')) {
         accordian21.push({
           name: "لاگ خطای سینک حسابداری",
           path: "/accountingProductSyncLogError",
@@ -1014,129 +1037,129 @@ const UsePermissons = () => {
       });
     }
     if (
-      userPermissionsSelector?.companyInfo?.view ||
-      userPermissionsSelector?.menu?.view ||
-      userPermissionsSelector?.showcases?.view ||
-      userPermissionsSelector?.sliders?.view ||
-      userPermissionsSelector?.seo?.view ||
-      userPermissionsSelector?.siteNotification?.view ||
-      userPermissionsSelector?.importSetting?.update ||
-      userPermissionsSelector?.synonim?.import ||
+      hasPermission('companyInfo.view') ||
+      hasPermission('menu.view') ||
+      hasPermission('showcases.view') ||
+      hasPermission('sliders.view') ||
+      hasPermission('seo.view') ||
+      hasPermission('siteNotification.view') ||
+      hasPermission('importSetting.update') ||
+      hasPermission('synonim.import') ||
       true
     ) {
       var subroutes = [];
       var accordian2 = [];
       var accordian3 = [];
-      if (userPermissionsSelector?.companyInfo?.view) {
+      if (hasPermission('companyInfo.view')) {
         subroutes.push({
           name: " تنظیمات  اصلی",
           path: "/companyInfo",
         });
       }
-      if (userPermissionsSelector?.websitekeySetting?.view) {
+      if (hasPermission('websitekeySetting.view')) {
         subroutes.push({
           name: " تنظیمات کلید های سایت",
           path: "/websitekeySetting",
         });
       }
-      if (userPermissionsSelector?.gatewaySetting?.view) {
+      if (hasPermission('gatewaySetting.view')) {
         subroutes.push({
           name: " تنظیمات درگاه",
           path: "/gatewaySetting",
         });
       }
-      if (userPermissionsSelector?.importSetting?.view) {
+      if (hasPermission('importSetting.view')) {
         subroutes.push({
           name: " تنظیمات ورود قیمت از اکسل",
           path: "/csvPrice",
         });
       }
-      if (userPermissionsSelector?.calendar?.view) {
+      if (hasPermission('calendar.view')) {
         subroutes.push({
           name: " تقویم",
           path: "/calender",
         });
       }
-      if (userPermissionsSelector?.permissionAdmin?.view) {
+      if (hasPermission('permissionAdmin.view')) {
         subroutes.push({
           name: " پرمیژن های ادمین",
           path: "/permissionsAdmin",
         });
       }
-      if (userPermissionsSelector?.header?.view) {
+      if (hasPermission('header.view')) {
         subroutes.push({
           name: " هدر های دیتابیس",
           path: "/headers",
         });
       }
-      if (userPermissionsSelector?.enum?.view) {
+      if (hasPermission('enum.view')) {
         subroutes.push({
           name: " اینام های دیتابیس",
           path: "/enum",
         });
       }
 
-      if (userPermissionsSelector?.synonim?.view) {
+      if (hasPermission('synonim.view')) {
         subroutes.push({
           name: "مترادف ها",
           path: "/synonyms",
         });
       }
-      if (userPermissionsSelector?.customeCss?.view) {
+      if (hasPermission('customeCss.view')) {
         subroutes.push({
           name: "سی اس اس های سفارشی",
           path: "/customeStyle",
         });
       }
-      if (userPermissionsSelector?.PersonalDetailMatch?.view) {
+      if (hasPermission('PersonalDetailMatch.view')) {
         subroutes.push({
           name: "اعتبار سنجی ها",
           path: "/personalDetailMatch",
         });
       }
-      if (userPermissionsSelector?.branch?.view) {
+      if (hasPermission('branch.view')) {
         subroutes.push({
           name: "شعب فروشگاه",
           path: "/branches",
         });
       }
-      if (userPermissionsSelector?.work?.view) {
+      if (hasPermission('work.view')) {
         subroutes.push({
           name: " شغل ها ",
           path: "/work",
         });
       }
-      if (userPermissionsSelector?.banner?.view) {
+      if (hasPermission('banner.view')) {
         subroutes.push({
           name: " بنر ها ",
           path: "/banner",
         });
       }
-      if (userPermissionsSelector?.scripts?.view) {
+      if (hasPermission('scripts.view')) {
         subroutes.push({
           name: "اسکریپت ها",
           path: "/scripts",
         });
       }
-      if (userPermissionsSelector?.bank?.view) {
+      if (hasPermission('bank.view')) {
         subroutes.push({
           name: " بانک ها ",
           path: "/banks",
         });
       }
-      if (userPermissionsSelector?.menuPanel?.view) {
+      if (hasPermission('menuPanel.view')) {
         subroutes.push({
           name: " منو  پنل کاربری",
           path: "/menuPanel",
         });
       }
-      if (userPermissionsSelector?.telegramGroup?.view) {
+      if (hasPermission('telegramGroup.view')) {
         subroutes.push({
           name: "گروه های تلگرام",
           path: "/telegramGroup",
         });
       }
-      if (userPermissionsSelector?.serviceType?.view) {
+      if (hasPermission('serviceType.view')) {
         subroutes.push({
           name: "تنظیمات خدمات",
           path: "/serviceType",
@@ -1174,23 +1197,23 @@ const UsePermissons = () => {
     }
 
     if (
-      userPermissionsSelector?.OnlinePaymentLog?.view ||
-      userPermissionsSelector?.apiTest?.view
+      hasPermission('OnlinePaymentLog.view') ||
+      hasPermission('apiTest.view')
     ) {
       var subroutes12 = [];
-      if (userPermissionsSelector?.OnlinePaymentLog?.view) {
+      if (hasPermission('OnlinePaymentLog.view')) {
         subroutes12.push({
           name: " لاگ درگاه",
           path: "/reportpayment",
         });
       }
-      if (userPermissionsSelector?.log?.view) {
+      if (hasPermission('log.view')) {
         subroutes12.push({
           name: "  لاگ سیستم",
           path: "/log",
         });
       }
-      if (userPermissionsSelector?.apiTest?.view) {
+      if (hasPermission('apiTest.view')) {
         subroutes12.push({
           name: " سلامت سرویس ها",
           path: "/api-test",
@@ -1204,7 +1227,7 @@ const UsePermissons = () => {
       });
     }
 
-    setHeaderMenu(temp);
+    return temp;
   }, [userPermissionsSelector]);
   return { headerMenu };
 };

@@ -34,6 +34,144 @@ body {
   .placeholder::placeholder {
     font-family: inherit;
   }
+
+  /* Modern Sidebar Gradients */
+  .sidebar-gradient {
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  }
+
+  .menu-item-active {
+    background: linear-gradient(135deg, rgba(100, 181, 246, 0.15) 0%, rgba(63, 81, 181, 0.1) 100%);
+    border: 1px solid rgba(100, 181, 246, 0.2);
+    box-shadow: 0 4px 15px rgba(100, 181, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .menu-item-hover {
+    background: linear-gradient(135deg, rgba(100, 181, 246, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    transform: translateY(-1px);
+    transition: all 0.3s ease;
+  }
+
+  .accordion-item-selected-gradient {
+    background: linear-gradient(135deg, rgba(100, 181, 246, 0.15) 0%, rgba(63, 81, 181, 0.1) 100%);
+    border: 1px solid rgba(100, 181, 246, 0.2);
+    box-shadow: 0 2px 10px rgba(100, 181, 246, 0.2);
+  }
+
+  .accordion-item-hover-gradient {
+    background: linear-gradient(135deg, rgba(100, 181, 246, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
+  }
+
+  .submenu-item-selected-gradient {
+    background: linear-gradient(135deg, rgba(100, 181, 246, 0.12) 0%, rgba(63, 81, 181, 0.08) 100%);
+    border: 1px solid rgba(100, 181, 246, 0.15);
+    box-shadow: 0 2px 8px rgba(100, 181, 246, 0.15);
+  }
+
+  .submenu-item-hover-gradient {
+    background: linear-gradient(135deg, rgba(100, 181, 246, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+  }
+
+  /* Modern Button Gradients */
+  .btn-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+  }
+
+  .btn-gradient-primary:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  }
+
+  .btn-gradient-secondary {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+    transition: all 0.3s ease;
+  }
+
+  .btn-gradient-secondary:hover {
+    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
+  }
+
+  .btn-gradient-success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+    transition: all 0.3s ease;
+  }
+
+  .btn-gradient-success:hover {
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.6);
+  }
+
+  /* Modern Input Styling */
+  .input-modern {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(100, 181, 246, 0.05) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+
+  .input-modern:focus {
+    border-color: #64b5f6;
+    box-shadow: 0 0 20px rgba(100, 181, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Modern Table Styling */
+  .table-modern {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+  }
+
+  .table-modern thead {
+    background: linear-gradient(135deg, rgba(100, 181, 246, 0.1) 0%, rgba(63, 81, 181, 0.05) 100%);
+  }
+
+  .table-modern tbody tr:hover {
+    background: linear-gradient(135deg, rgba(100, 181, 246, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  }
+
+  /* Modern Paper/Card Styling */
+  .paper-modern {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(100, 181, 246, 0.02) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Page Title Styling */
+  .page-title-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    position: relative;
+  }
+
+  .page-title-modern::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+  }
 }
 
 .enterDrag {

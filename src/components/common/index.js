@@ -16,3 +16,10 @@ export { default as ShowImage } from "./ShowImage";
 export { default as TextEditor } from "./TextEditor";
 export { default as TextInput } from "./TextInput";
 export { default as UploadImage } from "./UploadImage";
+
+// Modern UI Components
+export { default as PageHeader } from './PageHeader';
+export { default as ModernButton } from './ModernButton';
+export { default as ModernInput } from './ModernInput';
+export { default as ModernTable } from './ModernTable';
+export { default as ModernCard } from './ModernCard';

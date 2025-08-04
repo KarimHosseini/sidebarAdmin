@@ -139,47 +139,61 @@ const Sidebar = ({ headerMenu, viewALl, setViewALl }) => {
     document.location.href = "/";
   };
   return (
-    <Box
-      component="aside"
-      sx={{
-        width: viewALl || hover ? { md: "15.75rem", xs: "80%" } : "4rem",
-        background: (theme) =>
-          theme.palette.mode === "light"
-            ? "#fff"
-            : "#1a1a2e",
-        position: "fixed",
-        left: 0,
-        top: 0,
-        height: "100%",
-        zIndex: 100,
-        borderLeft: (theme) =>
-          theme.palette.mode === "light"
-            ? "1px solid #EEEEEE"
-            : "1px solid rgba(255, 255, 255, 0.1)",
-        transition: "transform 450ms ease, width 450ms ease",
-        overflowY: "auto",
-        overflowX: "hidden",
-        transform: "translateX(0)",
-        /*      "&:hover": {
-          width: "13.75rem",
-        }, */
-      }}
-      className=" overflow-hidden border-l"
-    >
-      <Box
-        sx={{ 
-          borderBottom: (theme) =>
-            theme.palette.mode === "light"
-              ? "1px solid #e5e9f2"
-              : "1px solid rgba(255, 255, 255, 0.1)",
-          padding: "14px 22px",
+          <Box
+        component="aside"
+        sx={{
+          width: viewALl || hover ? { md: "15.75rem", xs: "80%" } : "4rem",
           background: (theme) =>
             theme.palette.mode === "light"
-              ? "transparent"
-              : "rgba(255, 255, 255, 0.03)"
+              ? "#fff"
+              : "linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)",
+          position: "fixed",
+          left: 0,
+          top: 0,
+          height: "100%",
+          zIndex: 100,
+          borderLeft: (theme) =>
+            theme.palette.mode === "light"
+              ? "1px solid #EEEEEE"
+              : "1px solid rgba(255, 255, 255, 0.1)",
+          transition: "transform 450ms ease, width 450ms ease",
+          overflowY: "auto",
+          overflowX: "hidden",
+          transform: "translateX(0)",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "4px 0 20px rgba(0, 0, 0, 0.3)"
+              : "none",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: theme => theme.palette.mode === "dark" 
+              ? "linear-gradient(180deg, rgba(100, 181, 246, 0.05) 0%, transparent 100%)"
+              : "transparent",
+            pointerEvents: "none",
+          },
         }}
-        className="flex h-[50px] items-center justify-between"
+        className="overflow-hidden border-l"
       >
+              <Box
+          sx={{ 
+            borderBottom: (theme) =>
+              theme.palette.mode === "light"
+                ? "1px solid #e5e9f2"
+                : "1px solid rgba(255, 255, 255, 0.1)",
+            padding: "14px 22px",
+            background: (theme) =>
+              theme.palette.mode === "light"
+                ? "transparent"
+                : "linear-gradient(90deg, rgba(100, 181, 246, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%)",
+            backdropFilter: theme => theme.palette.mode === "dark" ? "blur(10px)" : "none",
+          }}
+          className="flex h-[50px] items-center justify-between"
+        >
         {isMd ? (
           <MenuIcon
             sx={{
@@ -261,7 +275,7 @@ const Sidebar = ({ headerMenu, viewALl, setViewALl }) => {
           background: (theme) =>
             theme.palette.mode === "light"
               ? "transparent"
-              : "rgba(255, 255, 255, 0.02)"
+              : "linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0%, rgba(100, 181, 246, 0.05) 100%)",
         }}>
           <TextField
             fullWidth
@@ -286,23 +300,25 @@ const Sidebar = ({ headerMenu, viewALl, setViewALl }) => {
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
-                backgroundColor: (theme) =>
+                background: (theme) =>
                   theme.palette.mode === "light" 
                     ? "#f7f7f7" 
-                    : "rgba(255, 255, 255, 0.05)",
-                borderRadius: "8px",
+                    : "linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(100, 181, 246, 0.05) 100%)",
+                borderRadius: "12px",
+                backdropFilter: theme => theme.palette.mode === "dark" ? "blur(10px)" : "none",
+                border: theme => theme.palette.mode === "dark" ? "1px solid rgba(255, 255, 255, 0.1)" : "none",
 
                 '& fieldset': {
                   borderColor: (theme) =>
                     theme.palette.mode === "light" 
                       ? "#e0e0e0" 
-                      : "rgba(255, 255, 255, 0.2)",
+                      : "transparent",
                 },
                 '&:hover fieldset': {
                   borderColor: (theme) =>
                     theme.palette.mode === "light" 
                       ? "#ccc" 
-                      : "rgba(255, 255, 255, 0.3)",
+                      : "rgba(100, 181, 246, 0.3)",
                 },
                 '&.Mui-focused fieldset': {
                   borderColor: (theme) =>
@@ -311,8 +327,8 @@ const Sidebar = ({ headerMenu, viewALl, setViewALl }) => {
                       : "#64b5f6",
                   boxShadow: theme => 
                     theme.palette.mode === "dark" 
-                      ? "0 0 10px rgba(100, 181, 246, 0.3)" 
-                      : "none",
+                      ? "0 0 20px rgba(100, 181, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)" 
+                      : "0 0 10px rgba(0, 30, 228, 0.2)",
                 },
               },
               '& .MuiInputBase-input': {
@@ -381,27 +397,35 @@ const Sidebar = ({ headerMenu, viewALl, setViewALl }) => {
                 <ListItem
                   sx={{
                     ...styles.listItem,
-                    backgroundColor: (theme) =>
+                    background: (theme) =>
                       `/${location.pathname.split("/")[1]}` === item.path
                         ? theme.palette.mode === "light"
                           ? "rgba(0, 30, 228, 0.08)"
-                          : "rgba(100, 181, 246, 0.12)"
+                          : "linear-gradient(135deg, rgba(100, 181, 246, 0.15) 0%, rgba(63, 81, 181, 0.1) 100%)"
                         : "transparent",
-                    borderRadius: `/${location.pathname.split("/")[1]}` === item.path ? "8px" : "0px",
-                    margin: `/${location.pathname.split("/")[1]}` === item.path ? "2px 8px" : "0px",
+                    borderRadius: `/${location.pathname.split("/")[1]}` === item.path ? "12px" : "0px",
+                    margin: `/${location.pathname.split("/")[1]}` === item.path ? "4px 12px" : "2px 8px",
                     boxShadow: (theme) =>
                       `/${location.pathname.split("/")[1]}` === item.path && theme.palette.mode === "dark"
-                        ? "0 2px 8px rgba(100, 181, 246, 0.2)"
+                        ? "0 4px 15px rgba(100, 181, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
+                        : "none",
+                    border: (theme) =>
+                      `/${location.pathname.split("/")[1]}` === item.path && theme.palette.mode === "dark"
+                        ? "1px solid rgba(100, 181, 246, 0.2)"
                         : "none",
                     "&:hover": {
-                      backgroundColor: (theme) =>
+                      background: (theme) =>
                         `/${location.pathname.split("/")[1]}` === item.path
                           ? theme.palette.mode === "light"
                             ? "rgba(0, 30, 228, 0.12)"
-                            : "rgba(100, 181, 246, 0.15)"
+                            : "linear-gradient(135deg, rgba(100, 181, 246, 0.2) 0%, rgba(63, 81, 181, 0.15) 100%)"
                           : theme.palette.mode === "light"
                             ? "rgba(0, 30, 228, 0.05)"
-                            : "rgba(100, 181, 246, 0.1)",
+                            : "linear-gradient(135deg, rgba(100, 181, 246, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%)",
+                      borderRadius: "12px",
+                      margin: "4px 12px",
+                      transform: "translateY(-1px)",
+                      transition: "all 0.3s ease",
                       ".MuiListItemIcon-root": {
                         color: (theme) =>
                           theme.palette.mode === "light"

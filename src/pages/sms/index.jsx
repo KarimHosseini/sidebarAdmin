@@ -1,191 +1,157 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Edit } from "@mui/icons-material";
-import AddIcon from "@mui/icons-material/Add";
-import { Button, IconButton, Paper } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { PageTitle } from "../../components/common";
-import Exports from "../../components/common/export";
-import CustomeLayout from "../../components/customeTable";
-import DataFetcher from "../../components/dataFetch";
+import CustomePage from "../../components/customePage";
 import axiosInstance from "../../components/dataFetch/axiosInstance";
-import Filters from "../../components/filters";
-import NoAccess from "../../components/noAccess";
-import SyncButton from "../../components/sync";
 import {
   baseUrl,
   EDIT_ACTIVE_SMS_CENTER,
   EXPORT_GET_SMS_CENTER,
   GET_SMS_CENTER,
   GET_SMS_CENTER_TYPES,
+  CREATE_SMS_CENTER,
+  EDIT_SMS_CENTER,
+  DELETE_SMS_CENTER,
+  ALL_USERS,
 } from "../../helpers/api-routes";
 import { configReq } from "../../helpers/functions";
-import SmsModal from "./modal";
+
 const Sms = () => {
   const { userPermissions } = useSelector((state) => state.relationals);
-  const [openCreate, setOpenCreate] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
-  const [sort, setSort] = useState({});
-  const [editingData, setEditingData] = useState({});
-  const [page, setPage] = useState(1);
-  const [search, setsearch] = useState("");
-  const [sumbitSearch, setSumbitSearch] = useState("");
-  const [limit, setLimit] = useState(20);
-  const [filter, setFilter] = useState([]);
-  const [allRows, setAllRows] = useState([]);
-  const [smsType, setSmsType] = useState([]);
-  const [refreshData, setRefresh] = useState(0);
-  const [selected, setSelected] = useState([]);
   const { token } = useSelector((state) => state.user);
+  const [smsType, setSmsType] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [refreshData, setRefresh] = useState(0);
 
+  // بارگذاری انواع پیام و کاربران
   useEffect(() => {
+    // بارگذاری انواع پیام
     axiosInstance(`${baseUrl}/${GET_SMS_CENTER_TYPES}`, configReq(token))
       .then((res) => {
-        setSmsType(res?.data.data);
+        setSmsType(res?.data.data || []);
+      })
+      .catch((err) => {});
+
+    // بارگذاری کاربران برای انتخاب موبایل
+    axiosInstance(`${baseUrl}/${ALL_USERS}?Page=1&Limit=1000`, configReq(token))
+      .then((res) => {
+        setUsers(res?.data.data || []);
       })
       .catch((err) => {});
   }, []);
-  const { hasMore, loading, allData, CurrentPage, metaData, header, setting } =
-    DataFetcher(
-      limit,
-      page,
-      sort,
-      GET_SMS_CENTER,
-      filter,
-      true,
-      refreshData,
-      sumbitSearch
-    );
-  useEffect(() => {
-    setAllRows(allData);
-  }, [allData]);
-  if (!userPermissions?.smsCenter?.view) {
-    return <NoAccess />;
-  }
-  return (
-    <>
-      <PageTitle
-        broadCrumb={[
-          {
-            title: "      پیام ها",
-            path: "/sms",
-          },
-        ]}
-        title="تنظیمات ارسال پیام ها به ادمین"
-      />
-      <div className="md:mx-3 mx-1">
-        <Paper
-          sx={{ border: "1px solid #dbdfea", mb: 1, padding: "15px 16px" }}
-          elevation={0}
-        >
-          {" "}
-          <div className="flex md:gap-4 gap-1 flex-wrap justify-between">
-            <Filters
-              limit={limit}
-              setLimit={setLimit}
-              headers={header}
-              setFilter={setFilter}
-              filter={filter}
-              setPage={setPage}
-              loading={loading}
-            />{" "}
-            <div className="flex justify-end flex-wrap gap-4 items-center">
-              <SyncButton setRefresh={setRefresh} setting={setting} />
-              {userPermissions?.smsCenter.export && (
-                <Exports
-                  sumbitSearch={sumbitSearch}
-                  filter={filter}
-                  header={header}
-                  data={allData}
-                  selectedData={selected}
-                  title=" پیام های ادمین"
-                  api={EXPORT_GET_SMS_CENTER}
-                />
-              )}
 
-              {userPermissions?.smsCenter?.insert && (
-                <Button onClick={() => setOpenCreate(true)} variant="contained">
-                  <AddIcon />
-                  افزودن مخاطب گیرنده جدید
-                </Button>
-              )}
-            </div>
+  // تعریف APIها برای CustomePage
+  const apis = {
+    GET_DATA: GET_SMS_CENTER,
+    EXPORT_DATA: EXPORT_GET_SMS_CENTER,
+    EDIT_ACTIVE_DATA: EDIT_ACTIVE_SMS_CENTER,
+    CREATE_DATA: CREATE_SMS_CENTER,
+    EDIT_DATA: EDIT_SMS_CENTER,
+    DELETE_DATA: DELETE_SMS_CENTER,
+  };
+
+  // تعریف فیلدهای فرم
+  const fields = [
+    {
+      name: 'mobile',
+      label: 'شماره موبایل',
+      type: 'custom',
+      required: true,
+      customRender: ({ value, onChange }) => {
+        const [searchTerm, setSearchTerm] = useState('');
+        const filteredUsers = users.filter(u => 
+          u.mobile?.includes(searchTerm) || 
+          u.userInformation?.name?.includes(searchTerm) ||
+          u.userInformation?.family?.includes(searchTerm)
+        );
+
+        return (
+          <div className="w-full">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="جستجو..."
+              className="w-full p-2 border rounded mb-2"
+            />
+            <select
+              value={value || ''}
+              onChange={(e) => onChange(e.target.value)}
+              className="w-full p-2 border rounded"
+              size="5"
+            >
+              <option value="">انتخاب کنید</option>
+              {filteredUsers.map(user => (
+                <option key={user.id} value={user.mobile}>
+                  {user.mobile} - {user.userInformation?.name} {user.userInformation?.family}
+                </option>
+              ))}
+            </select>
           </div>
-        </Paper>
-        <CustomeLayout
-          limit={limit}
-          setLimit={setLimit}
-          setAllRows={setAllRows}
-          editApi={
-            userPermissions?.smsCenter?.update ? EDIT_ACTIVE_SMS_CENTER : false
-          }
-          title="تنظیمات ارسال پیام ها به ادمین"
-          headers={header}
-          setSearch={setsearch}
-          search={search}
-          page={page}
-          total_pages={metaData?.total_pages}
-          setApplySearch={(e) => {
-            setPage(1);
-            setSumbitSearch(e);
-            /* setFilter({ ...filter, search: { value: e, type: "lk" } }); */
-          }}
-          rows={allRows}
-          hasMore={hasMore}
-          loading={loading}
-          setPage={setPage}
-          setting={setting}
-          CurrentPage={CurrentPage}
-          actions={
-            userPermissions?.smsCenter?.update
-              ? [
-                  {
-                    title: "ویرایش",
-                    handler: (
-                      <>
-                        <IconButton
-                          onClick={() => {
-                            setOpenEdit(true);
-                          }}
-                        >
-                          <Edit sx={{ color: "#ff2000" }} />
-                        </IconButton>
-                      </>
-                    ),
-                  },
-                ]
-              : false
-          }
-          length={metaData?.total}
-          name={"پیام های ادمین"}
-          maxHeight={{ lg: "69.5vh", md: "68vh", xl: "74vh" }}
-          setSort={(e) => {
-            setPage(1);
-            setSort({ ...sort, ...e });
-          }}
-          currentRow={(data) => {
-            setEditingData(data);
-          }}
-          setSelected={setSelected}
-          selected={selected}
-          setRefresh={setRefresh}
-        />
-      </div>
-      <SmsModal
-        open={openEdit || openCreate}
-        forEdit={openEdit}
-        prevData={editingData}
-        setAllRows={setAllRows}
-        allRows={allRows}
-        smsType={smsType}
-        close={() => {
-          setOpenCreate(false);
-          setOpenEdit(false);
-          setEditingData({});
-        }}
-      />
-    </>
+        );
+      }
+    },
+    {
+      name: 'type',
+      label: 'نوع پیام',
+      type: 'dropdown',
+      required: true,
+      options: smsType,
+      props: {
+        valueKey: 'id',
+        labelKey: 'title'
+      }
+    },
+    {
+      name: 'email',
+      label: 'ایمیل',
+      type: 'textInput',
+      required: true,
+      validation: (value) => {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          return 'ایمیل معتبر نیست';
+        }
+        return true;
+      }
+    },
+    {
+      name: 'active',
+      label: 'فعال',
+      type: 'switch',
+      required: false,
+      defaultValue: true
+    }
+  ];
+
+  // مدیریت تغییر فرم برای تبدیل type object به id
+  const handleFormChange = (fieldName, value) => {
+    if (fieldName === 'type' && value && typeof value === 'object') {
+      return value.id;
+    }
+    return value;
+  };
+
+  return (
+    <CustomePage
+      apis={apis}
+      title="تنظیمات ارسال پیام ها به ادمین"
+      canAdd={userPermissions?.smsCenter?.insert}
+      canEdit={userPermissions?.smsCenter?.update}
+      permissionsTag="smsCenter"
+      customeModal={false}
+      feilds={fields}
+      broadCrumb={[
+        {
+          title: "پیام ها",
+          path: "/sms",
+        },
+      ]}
+      onFormChange={handleFormChange}
+      key={`sms-${refreshData}-${smsType?.length}-${users?.length}`}
+    />
   );
 };
 
 export default Sms;
+
+// تسک 1: صفحه sms به فرم ژنراتور تبدیل شد ✓

@@ -1,198 +1,108 @@
-import { Edit } from "@mui/icons-material";
-import AddIcon from "@mui/icons-material/Add";
-import { Button, IconButton, Paper } from "@mui/material";
-import { useEffect, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { PageTitle } from "../../components/common";
-import Exports from "../../components/common/export";
-import CustomeLayout from "../../components/customeTable";
-import DataFetcher from "../../components/dataFetch";
-import Filters from "../../components/filters";
-import NoAccess from "../../components/noAccess";
-import SyncButton from "../../components/sync";
-
+import CustomePage from "../../components/customePage";
 import {
   ALL_ADMIN_PERMISSIONS,
   DELETE_ALL_ADMIN_PERMISSIONS,
   EDIT_ACTIVE_ALL_ADMIN_PERMISSIONS,
   EDIT_ADMIN_PERMISSIONS,
   EXPORT_ADMIN_PERMISSIONS,
+  CREATE_ADMIN_PERMISSIONS,
+  DELETE_ADMIN_PERMISSIONS,
 } from "../../helpers/api-routes";
-import PermissionAdminModal from "./modal";
 
 const PermissionsAdmin = () => {
   const { userPermissions } = useSelector((state) => state.relationals);
-  const [selected, setSelected] = useState([]);
-  const { token } = useSelector((state) => state.user);
-
-  const [openCreate, setOpenCreate] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
-  const navigate = useNavigate();
-  const [editingData, setEditingData] = useState({});
-  const [page, setPage] = useState(1);
   const [refreshData, setRefresh] = useState(0);
-  const [search, setsearch] = useState("");
-  const [sumbitSearch, setSumbitSearch] = useState("");
-  const [limit, setLimit] = useState(20);
-  const [filter, setFilter] = useState([]);
-  const [allRows, setAllRows] = useState([]);
-  const [allShippingClass, setAllShippingClass] = useState([]);
 
-  const [sort, setSort] = useState({});
-  const { hasMore, loading, allData, CurrentPage, metaData, header, setting } =
-    DataFetcher(
-      limit,
-      page,
-      sort,
-      ALL_ADMIN_PERMISSIONS,
-      filter,
-      true,
-      refreshData,
-      sumbitSearch
-    );
-  useEffect(() => {
-    setAllRows(allData);
-  }, [allData]);
+  // تعریف APIها برای CustomePage
+  const apis = {
+    GET_DATA: ALL_ADMIN_PERMISSIONS,
+    EXPORT_DATA: EXPORT_ADMIN_PERMISSIONS,
+    EDIT_ACTIVE_DATA: EDIT_ADMIN_PERMISSIONS,
+    CREATE_DATA: CREATE_ADMIN_PERMISSIONS,
+    EDIT_DATA: EDIT_ADMIN_PERMISSIONS,
+    DELETE_DATA: DELETE_ADMIN_PERMISSIONS,
+    DELETE_ALL_DATA: DELETE_ALL_ADMIN_PERMISSIONS,
+    EDIT_ACTIVE_ALL_DATA: EDIT_ACTIVE_ALL_ADMIN_PERMISSIONS,
+  };
 
-  if (!userPermissions?.permissionAdmin?.view) {
-    return <NoAccess />;
-  }
+  // تعریف فیلدهای فرم
+  const fields = [
+    {
+      name: 'title',
+      label: 'عنوان',
+      type: 'textInput',
+      required: true
+    },
+    {
+      name: 'tag',
+      label: 'تگ',
+      type: 'textInput',
+      required: true
+    },
+    {
+      name: 'section',
+      label: 'بخش',
+      type: 'textInput',
+      required: false
+    },
+    {
+      name: 'description',
+      label: 'توضیحات',
+      type: 'textInput',
+      required: false,
+      props: {
+        multiline: true,
+        rows: 3
+      }
+    },
+    {
+      name: 'permissionType',
+      label: 'نوع دسترسی',
+      type: 'dropdown',
+      required: false,
+      options: [
+        { id: 'read', title: 'خواندن' },
+        { id: 'write', title: 'نوشتن' },
+        { id: 'delete', title: 'حذف' },
+        { id: 'admin', title: 'مدیر' }
+      ],
+      props: {
+        valueKey: 'id',
+        labelKey: 'title'
+      }
+    },
+    {
+      name: 'isActive',
+      label: 'فعال',
+      type: 'switch',
+      required: false,
+      defaultValue: true
+    }
+  ];
 
   return (
-    <>
-      <PageTitle
-        broadCrumb={[
-          {
-            title: "   تنظیمات",
-            path: "/companyInfo",
-          },
-        ]}
-        title=" پرمیژن های ادمین"
-      />
-      <div className="md:mx-3 mx-1">
-        <Paper
-          sx={{ border: "1px solid #dbdfea", mb: 1, padding: "15px 16px" }}
-          elevation={0}
-        >
-          <div className="flex md:gap-4 gap-1 flex-wrap justify-between">
-            <Filters
-              limit={limit}
-              setLimit={setLimit}
-              headers={header}
-              setFilter={setFilter}
-              filter={filter}
-              setPage={setPage}
-              loading={loading}
-            />
-            <div className="flex justify-end flex-wrap gap-4 items-center">
-              <SyncButton setRefresh={setRefresh} setting={setting} />
-              {userPermissions?.permissionAdmin.export && (
-                <Exports
-                  sumbitSearch={sumbitSearch}
-                  filter={filter}
-                  header={header}
-                  data={allData}
-                  selectedData={selected}
-                  title=" پرمیژن های ادمین"
-                  api={EXPORT_ADMIN_PERMISSIONS}
-                />
-              )}
-
-              {userPermissions?.permissionAdmin?.add && (
-                <Button onClick={() => setOpenCreate(true)} variant="contained">
-                  <AddIcon />
-                  افزودن پرمیژن جدید
-                </Button>
-              )}
-            </div>
-          </div>
-        </Paper>
-        <CustomeLayout
-          limit={limit}
-          setLimit={setLimit}
-          setAllRows={setAllRows}
-          editApi={
-            userPermissions?.permissionAdmin?.update
-              ? EDIT_ADMIN_PERMISSIONS
-              : false
-          }
-          title=" پرمیژن های ادمین"
-          headers={header}
-          setSearch={setsearch}
-          search={search}
-          page={page}
-          total_pages={metaData?.total_pages}
-          setApplySearch={(e) => {
-            setPage(1);
-            setSumbitSearch(e);
-            /* setFilter({ ...filter, search: { value: e, type: "lk" } }); */
-          }}
-          rows={allRows}
-          hasMore={hasMore}
-          loading={loading}
-          setPage={setPage}
-          setting={setting}
-          CurrentPage={CurrentPage}
-          actions={
-            userPermissions?.permissionAdmin?.update
-              ? [
-                  {
-                    title: "ویرایش",
-                    handler: (
-                      <>
-                        <IconButton
-                          onClick={() => {
-                            setOpenEdit(true);
-                          }}
-                        >
-                          <Edit sx={{ color: "#ff2000" }} />
-                        </IconButton>
-                      </>
-                    ),
-                  },
-                ]
-              : false
-          }
-          length={metaData?.total}
-          name={"شرکت"}
-          maxHeight={{ lg: "69.5vh", md: "68vh", xl: "74vh" }}
-          setSort={(e) => {
-            setPage(1);
-            setSort({ ...sort, ...e });
-          }}
-          currentRow={(data) => {
-            setEditingData(data);
-          }}
-          setSelected={setSelected}
-          selected={selected}
-          setRefresh={setRefresh}
-          deleteAllApi={
-            userPermissions?.permissionAdmin?.deleteAll
-              ? DELETE_ALL_ADMIN_PERMISSIONS
-              : null
-          }
-          editActiveAllApi={
-            userPermissions?.permissionAdmin?.activeAll
-              ? EDIT_ACTIVE_ALL_ADMIN_PERMISSIONS
-              : null
-          }
-        />
-      </div>{" "}
-      <PermissionAdminModal
-        open={openEdit || openCreate}
-        forEdit={openEdit}
-        setAllRows={setAllRows}
-        allRows={allRows}
-        data={editingData}
-        close={() => {
-          setOpenCreate(false);
-          setOpenEdit(false);
-          setEditingData({});
-        }}
-      />
-    </>
+    <CustomePage
+      apis={apis}
+      title="پرمیژن های ادمین"
+      canAdd={userPermissions?.permissionAdmin?.add}
+      canEdit={userPermissions?.permissionAdmin?.update}
+      permissionsTag="permissionAdmin"
+      customeModal={false}
+      feilds={fields}
+      broadCrumb={[
+        {
+          title: "تنظیمات",
+          path: "/companyInfo",
+        },
+      ]}
+      key={`permission-admin-${refreshData}`}
+    />
   );
 };
 
 export default PermissionsAdmin;
+
+// تسک 1: صفحه permissionAdmin به فرم ژنراتور تبدیل شد ✓

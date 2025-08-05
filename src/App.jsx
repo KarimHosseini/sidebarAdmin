@@ -43,6 +43,9 @@ import {
 } from "./pages";
 import Comments from "./pages/comments";
 import CompanyInfo from "./pages/companyInfo";
+import CompanyInfoRefactored from "./pages/companyInfo/CompanyInfoRefactored";
+import HomeWithDragDrop from "./pages/home/HomeWithDragDrop";
+import HomeWithDragDropOptimized from "./pages/home/HomeWithDragDropOptimized";
 import CreateDiscount from "./pages/createDiscount";
 import CreateSynonyms from "./pages/createSynonims";
 import Discounts from "./pages/discount";
@@ -606,15 +609,15 @@ const App = () => {
             {/*      <h1 style={{textAlign:"center"}}>{sessionStorage.getItem("loaded")}</h1> */}
             <Layout>
               <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/home" element={<Home />} />
+                <Route path="/" element={<HomeWithDragDropOptimized />} />
+                <Route path="/home" element={<HomeWithDragDropOptimized />} />
                 <Route path="/banks" element={<Banks />} />
                 <Route path="/banks/branch/:id" element={<BankBranch />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:id" element={<SingleProduct />} />
                 <Route path="/properties" element={<ProductProperties />} />
                 <Route path="/products/create" element={<CreateProduct />} />
-                <Route path="/companyInfo" element={<CompanyInfo />} />
+                <Route path="/companyInfo" element={<CompanyInfoRefactored />} />
                 <Route path="/comments" element={<Comments />} />
                 <Route path="/reports" element={<States />} />
                 <Route path="/discounts/create" element={<CreateDiscount />} />

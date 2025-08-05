@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Modal, TextInput } from "../../components/common";
 import CustomePage from "../../components/customePage";
+import { createSmartLinkHandler } from "../../helpers/utils";
 import axiosInstance from "../../components/dataFetch/axiosInstance";
 import NoAccess from "../../components/noAccess";
 import {
@@ -151,7 +152,7 @@ const Products = () => {
                               "    اجازه ویرایش این محصول را در این بخش ندارید "
                             );
                           } else {
-                            window.open(`/products/${id}`, "_blank");
+                            createSmartLinkHandler(`/products/${id}`, navigate)(event);
                           }
                         }}
                       >
@@ -172,9 +173,10 @@ const Products = () => {
                           const id = target.getAttribute("data-id");
                           const slug = target.getAttribute("data-slug");
 
-                          window.open(
-                            `/seoGenrator?id=${id}&name=product&slug=${slug}`
-                          );
+                          createSmartLinkHandler(
+                            `/seoGenrator?id=${id}&name=product&slug=${slug}`,
+                            navigate
+                          )(event);
                         }}
                         variant="outlined"
                       >

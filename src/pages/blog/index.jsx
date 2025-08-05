@@ -2,7 +2,9 @@
 import { Button } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import CustomePage from "../../components/customePage";
+import { createSmartLinkHandler } from "../../helpers/utils";
 import axiosInstance from "../../components/dataFetch/axiosInstance";
 import {
   EDIT_ACTIVE_BLOG,
@@ -22,6 +24,7 @@ import RedirectModal from "../../components/blogs/redirect";
 const Blogs = () => {
   const { userPermissions } = useSelector((state) => state.relationals);
   const { token } = useSelector((state) => state.user);
+  const navigate = useNavigate();
   const [editingData, setEditingData] = useState({});
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
@@ -139,9 +142,10 @@ const Blogs = () => {
         <Button
           onClick={(rowData) => {
             const data = rowData?.id ? rowData : editingData;
-            window.open(
-              `/seoGenrator?id=${data?.id}&name=blog&slug=${data?.url?.slice(1)}`
-            );
+            createSmartLinkHandler(
+              `/seoGenrator?id=${data?.id}&name=blog&slug=${data?.url?.slice(1)}`,
+              navigate
+            )(rowData);
           }}
           variant="outlined"
         >

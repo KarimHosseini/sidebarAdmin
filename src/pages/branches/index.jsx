@@ -1,58 +1,28 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Edit } from "@mui/icons-material";
-import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, IconButton, Paper } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { PageTitle } from "../../components/common";
-import Exports from "../../components/common/export";
-import CustomeLayout from "../../components/customeTable";
-import DataFetcher from "../../components/dataFetch";
+import CustomePage from "../../components/customePage";
 import axiosInstance from "../../components/dataFetch/axiosInstance";
-import Filters from "../../components/filters";
-import NoAccess from "../../components/noAccess";
-import SyncButton from "../../components/sync";
 import {
   baseUrl,
   EDIT_ACTIVE_BRANCHES,
   EXPORT_BRANCHES,
   GET_ALL_BRANCHES,
   GET_PROVINCE,
+  CREATE_BRANCHES,
+  EDIT_BRANCHES,
+  DELETE_BRANCHES,
 } from "../../helpers/api-routes";
 import { configReq } from "../../helpers/functions";
-import BrandModal from "./modal";
 
 const Branches = () => {
   const { userPermissions } = useSelector((state) => state.relationals);
-  const [openCreate, setOpenCreate] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
-  const [sort, setSort] = useState({});
-  const [editingData, setEditingData] = useState({});
-  const [page, setPage] = useState(1);
-  const [search, setsearch] = useState("");
-  const [sumbitSearch, setSumbitSearch] = useState("");
-  const [limit, setLimit] = useState(20);
-  const [province, setProvince] = useState([]);
   const { token } = useSelector((state) => state.user);
+  const [province, setProvince] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedProvince, setSelectedProvince] = useState(null);
 
-  const [filter, setFilter] = useState([]);
-  const [refreshData, setRefresh] = useState(0);
-  const [selected, setSelected] = useState([]);
-  const [allRows, setAllRows] = useState([]);
-  const { hasMore, loading, allData, CurrentPage, metaData, header, setting } =
-    DataFetcher(
-      limit,
-      page,
-      sort,
-      GET_ALL_BRANCHES,
-      filter,
-      true,
-      refreshData,
-      sumbitSearch
-    );
-  useEffect(() => {
-    setAllRows(allData);
-  }, [allData]);
+  // بارگذاری لیست استان‌ها
   useEffect(() => {
     axiosInstance(`${baseUrl}/${GET_PROVINCE}`, configReq(token)).then(
       (res) => {
@@ -63,133 +33,142 @@ const Branches = () => {
       }
     );
   }, []);
-  if (!userPermissions?.branch?.view) {
-    return <NoAccess />;
-  }
+
+  // تعریف APIها برای CustomePage
+  const apis = {
+    GET_DATA: GET_ALL_BRANCHES,
+    EXPORT_DATA: EXPORT_BRANCHES,
+    EDIT_ACTIVE_DATA: EDIT_ACTIVE_BRANCHES,
+    CREATE_DATA: CREATE_BRANCHES,
+    EDIT_DATA: EDIT_BRANCHES,
+    DELETE_DATA: DELETE_BRANCHES,
+  };
+
+  // تعریف فیلدهای فرم
+  const fields = [
+    {
+      name: 'title',
+      label: 'نام شعبه',
+      type: 'textInput',
+      required: true
+    },
+    {
+      name: 'provinceId',
+      label: 'استان',
+      type: 'dropdown',
+      required: true,
+      options: province,
+      props: {
+        valueKey: 'id',
+        labelKey: 'title'
+      }
+    },
+    {
+      name: 'cityId',
+      label: 'شهر',
+      type: 'dropdown',
+      required: true,
+      options: cities,
+      props: {
+        valueKey: 'id',
+        labelKey: 'title'
+      },
+      // نمایش تنها در صورت انتخاب استان
+      conditional: (formData) => formData.provinceId
+    },
+    {
+      name: 'address',
+      label: 'آدرس',
+      type: 'textInput',
+      required: false,
+      props: {
+        multiline: true,
+        rows: 2
+      }
+    },
+    {
+      name: 'mapLocation',
+      label: 'موقعیت روی نقشه',
+      type: 'custom',
+      customRender: ({ value, onChange }) => {
+        const handleMapChange = (lat, lng) => {
+          onChange({
+            latitude: lat,
+            longitude: lng
+          });
+        };
+
+        return (
+          <div className="w-full h-64">
+            {/* نقشه */}
+            <div className="text-sm text-gray-600 mb-2">
+              برای انتخاب موقعیت روی نقشه کلیک کنید
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      name: 'latitude',
+      label: 'عرض جغرافیایی',
+      type: 'numberInput',
+      required: false
+    },
+    {
+      name: 'longitude',
+      label: 'طول جغرافیایی',
+      type: 'numberInput',
+      required: false
+    },
+    {
+      name: 'active',
+      label: 'فعال/غیرفعال',
+      type: 'switch',
+      required: false,
+      defaultValue: true
+    },
+    {
+      name: 'avatar',
+      label: 'تصویر شعبه',
+      type: 'uploader',
+      required: false
+    }
+  ];
+
+  // مدیریت تغییر فرم
+  const handleFormChange = (fieldName, value, formData) => {
+    // هنگام تغییر استان، لیست شهرها را بروزرسانی کن
+    if (fieldName === 'provinceId' && value) {
+      const selectedProv = province.find(p => p.id === value);
+      if (selectedProv && selectedProv.cities) {
+        setCities(selectedProv.cities);
+      }
+      // پاک کردن انتخاب شهر قبلی
+      return {
+        provinceId: value,
+        cityId: null
+      };
+    }
+    return value;
+  };
 
   return (
-    <>
-      <PageTitle
-        title="شعب فروشگاه"
-        broadCrumb={[
-          {
-            title: " تنظیمات ",
-            path: "/companyInfo",
-          },
-        ]}
-      />
-      <div className="md:mx-3 mx-1">
-        <Paper
-          sx={{ border: "1px solid #dbdfea", mb: 1, padding: "15px 16px" }}
-          elevation={0}
-        >
-          <Box className="flex md:gap-4 gap-1 flex-wrap justify-between">
-            <Filters
-              limit={limit}
-              setLimit={setLimit}
-              headers={header}
-              setFilter={setFilter}
-              filter={filter}
-              setPage={setPage}
-              loading={loading}
-            />{" "}
-            <div className="flex justify-end flex-wrap gap-4 items-center">
-              <SyncButton setRefresh={setRefresh} setting={setting} />
-              {userPermissions?.branch?.export && (
-                <Exports
-                  sumbitSearch={sumbitSearch}
-                  filter={filter}
-                  header={header}
-                  data={allData}
-                  selectedData={selected}
-                  title="شعبه"
-                  api={EXPORT_BRANCHES}
-                />
-              )}
-
-              {userPermissions?.branch?.insert && (
-                <Button onClick={() => setOpenCreate(true)} variant="contained">
-                  <AddIcon />
-                  افزودن شعبه جدید
-                </Button>
-              )}
-            </div>
-          </Box>
-        </Paper>
-        <CustomeLayout
-          limit={limit}
-          setLimit={setLimit}
-          setAllRows={setAllRows}
-          editApi={
-            userPermissions?.branch?.update ? EDIT_ACTIVE_BRANCHES : false
-          }
-          title="شعب فروشگاه"
-          headers={header}
-          setSearch={setsearch}
-          search={search}
-          page={page}
-          total_pages={metaData?.total_pages}
-          setApplySearch={(e) => {
-            setPage(1);
-            setSumbitSearch(e);
-
-            /* setFilter({ ...filter, search: { value: e, type: "lk" } }); */
-          }}
-          rows={allRows}
-          hasMore={hasMore}
-          loading={loading}
-          setPage={setPage}
-          setting={setting}
-          CurrentPage={CurrentPage}
-          actions={
-            userPermissions?.branch?.update
-              ? [
-                  {
-                    title: "ویرایش",
-                    handler: (
-                      <>
-                        <IconButton
-                          onClick={() => {
-                            setOpenEdit(true);
-                          }}
-                        >
-                          <Edit sx={{ color: "#ff2000" }} />
-                        </IconButton>
-                      </>
-                    ),
-                  },
-                ]
-              : false
-          }
-          length={metaData?.total}
-          name={"شعبه"}
-          maxHeight={{ lg: "69.5vh", md: "68vh", xl: "74vh" }}
-          setSort={(e) => {
-            setPage(1);
-            setSort({ ...sort, ...e });
-          }}
-          currentRow={(data) => {
-            setEditingData(data);
-          }}
-          setSelected={setSelected}
-          selected={selected}
-          setRefresh={setRefresh}
-        />
-      </div>
-      <BrandModal
-        open={openEdit || openCreate}
-        forEdit={openEdit}
-        data={editingData}
-        setAllRows={setAllRows}
-        province={province}
-        allRows={allRows}
-        close={() => {
-          setOpenCreate(false);
-          setOpenEdit(false);
-          setEditingData({});
-        }}
-      />
-    </>
+    <CustomePage
+      apis={apis}
+      title="شعب فروشگاه"
+      canAdd={userPermissions?.branch?.insert}
+      canEdit={userPermissions?.branch?.update}
+      permissionsTag="branch"
+      customeModal={false}
+      feilds={fields}
+      broadCrumb={[
+        {
+          title: "تنظیمات",
+          path: "/companyInfo",
+        },
+      ]}
+      onFormChange={handleFormChange}
+    />
   );
 };
 

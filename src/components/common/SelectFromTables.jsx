@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -6,407 +6,200 @@ import {
   DialogActions,
   Button,
   Box,
-  TextField,
   Chip,
+  Typography,
   IconButton,
-  CircularProgress,
-  Alert,
-  InputAdornment
 } from '@mui/material';
-import { Close, Search, Add } from '@mui/icons-material';
-import { useSelector } from 'react-redux';
-import DataFetcher from '../dataFetch';
-import CustomeLayout from '../customeTable';
-import { createSelectionManager } from '../../utils/selectionManager';
-import axiosInstance from '../dataFetch/axiosInstance';
-import { baseUrl } from '../../helpers/api-routes';
-import { configReq } from '../../helpers/functions';
+import CloseIcon from '@mui/icons-material/Close';
+import CustomePage from '../customePage';
 
+/**
+ * SelectFromTables Component
+ * 
+ * A reusable component for selecting items from tables using CustomePage
+ * 
+ * @param {Object} props
+ * @param {Object} props.apis - API endpoints for table data (GET_DATA, etc.)
+ * @param {string} props.tableName - Name of the table for display
+ * @param {Array} props.selected - Currently selected items
+ * @param {Function} props.setSelected - Function to update selected items
+ * @param {boolean} props.open - Dialog open state
+ * @param {Function} props.onClose - Function to close dialog
+ * @param {boolean} props.multiple - Allow multiple selection (default: true)
+ * @param {string} props.title - Dialog title
+ * @param {Array} props.fields - Fields configuration for CustomePage
+ * @param {string} props.permissionsTag - Permissions tag for CustomePage
+ * @param {Object} props.filterConfig - Filter configuration
+ * @param {Array} props.defaultFilter - Default filters
+ * @param {string} props.rowIdField - Field to use as row ID (default: 'id')
+ * @param {Function} props.onConfirm - Optional callback when selection is confirmed
+ */
 const SelectFromTables = ({
-  open,
-  onClose,
-  title = 'انتخاب از جدول',
-  tableApi,
+  apis,
   tableName,
   selected = [],
-  onSelect,
+  setSelected,
+  open = false,
+  onClose,
   multiple = true,
-  displayField = 'title',
-  valueField = 'id',
-  searchable = true,
-  filters = [],
-  maxSelection = null,
-  minSelection = null,
-  customHeaders = null,
-  hideColumns = [],
-  additionalParams = {},
-  renderChip,
-  onRemove,
-  allowCreate = false,
-  createApi = null,
-  createFields = [],
-  width = 'lg',
-  height = '80vh'
+  title,
+  fields = [],
+  permissionsTag,
+  filterConfig,
+  defaultFilter = [],
+  rowIdField = 'id',
+  onConfirm,
+  ...otherProps
 }) => {
-  const { token } = useSelector((state) => state.user);
-  const [page, setPage] = useState(1);
-  const [refreshData, setRefresh] = useState(0);
-  const [search, setSearch] = useState('');
-  const [submitSearch, setSubmitSearch] = useState('');
-  const [limit, setLimit] = useState(20);
-  const [filter, setFilter] = useState(filters);
-  const [sort, setSort] = useState({});
-  const [allRows, setAllRows] = useState([]);
-  const [internalSelected, setInternalSelected] = useState(selected);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [createLoading, setCreateLoading] = useState(false);
-  const [createData, setCreateData] = useState({});
+  const [tempSelected, setTempSelected] = useState([]);
+  const [isOpen, setIsOpen] = useState(open);
 
-  // Create selection manager
-  const selectionManager = React.useRef(
-    createSelectionManager({
-      defaultSelected: selected.map(item => 
-        typeof item === 'object' ? item[valueField] : item
-      ),
-      multiple,
-      maxSelection,
-      debug: process.env.NODE_ENV === 'development'
-    })
-  ).current;
-
-  // Fetch data using DataFetcher
-  const {
-    hasMore,
-    loading,
-    allData,
-    CurrentPage,
-    metaData,
-    header,
-    setting,
-  } = DataFetcher(
-    limit,
-    page,
-    sort,
-    tableApi,
-    filter,
-    true,
-    refreshData,
-    submitSearch,
-    1,
-    additionalParams
-  );
-
-  // Update rows when data changes
   useEffect(() => {
-    setAllRows(allData);
-  }, [allData]);
-
-  // Update internal selected when external selected changes
-  useEffect(() => {
-    setInternalSelected(selected);
-    // Update selection manager
-    const selectedIds = selected.map(item => 
-      typeof item === 'object' ? item[valueField] : item
-    );
-    selectionManager.clear();
-    selectedIds.forEach(id => selectionManager.select(id));
-  }, [selected, valueField, selectionManager]);
-
-  // Handle selection changes
-  const handleSelectionChange = useCallback(() => {
-    const selectedIds = selectionManager.getSelected();
-    const selectedItems = allRows.filter(row => 
-      selectedIds.includes(row[valueField])
-    );
-    
-    if (multiple) {
-      setInternalSelected(selectedItems);
-    } else {
-      setInternalSelected(selectedItems.length > 0 ? [selectedItems[0]] : []);
+    setIsOpen(open);
+    if (open) {
+      // Initialize temp selection with current selection
+      setTempSelected([...selected]);
     }
-  }, [selectionManager, allRows, valueField, multiple]);
+  }, [open, selected]);
 
-  // Subscribe to selection changes
-  useEffect(() => {
-    const unsubscribe = selectionManager.subscribe(handleSelectionChange);
-    return unsubscribe;
-  }, [selectionManager, handleSelectionChange]);
+  const handleClose = () => {
+    setTempSelected([]);
+    setIsOpen(false);
+    if (onClose) onClose();
+  };
 
-  // Filter headers if custom headers provided
-  const displayHeaders = customHeaders || header.filter(h => 
-    !hideColumns.includes(h.name)
-  );
-
-  // Handle confirm selection
   const handleConfirm = () => {
-    if (minSelection && internalSelected.length < minSelection) {
-      alert(`حداقل ${minSelection} مورد باید انتخاب شود`);
-      return;
+    setSelected(tempSelected);
+    if (onConfirm) {
+      onConfirm(tempSelected);
     }
-    
-    onSelect(internalSelected);
-    onClose();
+    handleClose();
   };
 
-  // Handle remove item
-  const handleRemoveItem = (item) => {
-    const itemId = typeof item === 'object' ? item[valueField] : item;
-    selectionManager.deselect(itemId);
-    
-    const newSelected = internalSelected.filter(selectedItem => {
-      const selectedId = typeof selectedItem === 'object' 
-        ? selectedItem[valueField] 
-        : selectedItem;
-      return selectedId !== itemId;
-    });
-    
-    setInternalSelected(newSelected);
-    
-    if (onRemove) {
-      onRemove(item);
+  const handleSelectionChange = (newSelection) => {
+    if (multiple) {
+      setTempSelected(newSelection);
+    } else {
+      // For single selection, only keep the last selected item
+      setTempSelected(newSelection.slice(-1));
     }
   };
 
-  // Handle create new item
-  const handleCreate = async () => {
-    if (!createApi) return;
-    
-    setCreateLoading(true);
-    try {
-      const res = await axiosInstance.post(
-        `${baseUrl}/${createApi}`,
-        createData,
-        configReq(token)
-      );
-      
-      if (res.data.code === 200) {
-        const newItem = res.data.data;
-        setAllRows([newItem, ...allRows]);
-        
-        // Auto-select the new item
-        selectionManager.select(newItem[valueField]);
-        setInternalSelected([...internalSelected, newItem]);
-        
-        setShowCreateDialog(false);
-        setCreateData({});
-        setRefresh(prev => prev + 1);
-      }
-    } catch (error) {
-      console.error('Error creating item:', error);
-    } finally {
-      setCreateLoading(false);
-    }
-  };
-
-  // Render selected items chips
-  const renderSelectedChips = () => {
-    return internalSelected.map((item, index) => {
-      const label = typeof item === 'object' 
-        ? item[displayField] 
-        : item;
-      
-      if (renderChip) {
-        return renderChip(item, () => handleRemoveItem(item), index);
-      }
-      
-      return (
-        <Chip
-          key={index}
-          label={label}
-          onDelete={() => handleRemoveItem(item)}
-          size="small"
-          sx={{ m: 0.5 }}
-        />
-      );
-    });
-  };
+  const dialogTitle = title || `انتخاب ${tableName}`;
 
   return (
     <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth={width}
+      open={isOpen}
+      onClose={handleClose}
+      maxWidth="lg"
       fullWidth
       PaperProps={{
         sx: {
-          height: height,
+          height: '90vh',
           display: 'flex',
-          flexDirection: 'column'
-        }
+          flexDirection: 'column',
+        },
       }}
     >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center' 
-      }}>
-        <span>{title}</span>
-        <IconButton onClick={onClose} size="small">
-          <Close />
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: 1,
+          borderColor: 'divider',
+          pb: 2,
+        }}
+      >
+        <Typography variant="h6">{dialogTitle}</Typography>
+        <IconButton
+          edge="end"
+          color="inherit"
+          onClick={handleClose}
+          aria-label="close"
+        >
+          <CloseIcon />
         </IconButton>
       </DialogTitle>
-      
-      <DialogContent sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        gap: 2,
-        overflow: 'hidden' 
-      }}>
+
+      <DialogContent sx={{ flex: 1, overflow: 'hidden', p: 0 }}>
         {/* Selected items display */}
-        {internalSelected.length > 0 && (
-          <Box sx={{ 
-            display: 'flex', 
-            flexWrap: 'wrap', 
-            gap: 1,
-            p: 2,
-            bgcolor: 'background.default',
-            borderRadius: 1,
-            maxHeight: '100px',
-            overflowY: 'auto'
-          }}>
-            {renderSelectedChips()}
+        {tempSelected.length > 0 && (
+          <Box
+            sx={{
+              p: 2,
+              borderBottom: 1,
+              borderColor: 'divider',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 1,
+              alignItems: 'center',
+            }}
+          >
+            <Typography variant="body2" sx={{ mr: 1 }}>
+              انتخاب شده:
+            </Typography>
+            {tempSelected.map((item) => (
+              <Chip
+                key={item[rowIdField]}
+                label={item.title || item.name || `آیتم ${item[rowIdField]}`}
+                onDelete={() => {
+                  setTempSelected(tempSelected.filter(
+                    (selected) => selected[rowIdField] !== item[rowIdField]
+                  ));
+                }}
+                size="small"
+                color="primary"
+                variant="outlined"
+              />
+            ))}
           </Box>
         )}
-        
-        {/* Search and actions */}
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          {searchable && (
-            <TextField
-              placeholder="جستجو..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  setSubmitSearch(search);
-                  setPage(1);
-                }
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search />
-                  </InputAdornment>
-                ),
-              }}
-              size="small"
-              sx={{ flexGrow: 1 }}
-            />
-          )}
-          
-          {allowCreate && createApi && (
-            <Button
-              variant="outlined"
-              startIcon={<Add />}
-              onClick={() => setShowCreateDialog(true)}
-              size="small"
-            >
-              ایجاد جدید
-            </Button>
-          )}
-        </Box>
-        
-        {/* Selection info */}
-        {(maxSelection || minSelection) && (
-          <Alert severity="info" sx={{ py: 0.5 }}>
-            {maxSelection && `حداکثر ${maxSelection} مورد`}
-            {maxSelection && minSelection && ' - '}
-            {minSelection && `حداقل ${minSelection} مورد`}
-            {` (${internalSelected.length} مورد انتخاب شده)`}
-          </Alert>
-        )}
-        
-        {/* Table */}
-        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-          <CustomeLayout
-            limit={limit}
-            setLimit={setLimit}
-            setAllRows={setAllRows}
-            title={tableName}
-            headers={displayHeaders}
-            setSearch={setSearch}
-            search={search}
-            page={page}
-            total_pages={metaData?.total_pages}
-            setApplySearch={(e) => {
-              setPage(1);
-              setSubmitSearch(e);
+
+        {/* Table with CustomePage */}
+        <Box sx={{ height: '100%', overflow: 'auto' }}>
+          <CustomePage
+            apis={apis}
+            title=""
+            canAdd={false}
+            canEdit={false}
+            permissionsTag={permissionsTag}
+            feilds={fields}
+            defaultSelected={tempSelected}
+            onDataChange={handleSelectionChange}
+            filterConfig={filterConfig}
+            defaultFilter={defaultFilter}
+            rowIdField={rowIdField}
+            showExport={false}
+            showSync={false}
+            selectionActions={[]}
+            customComponents={{
+              PageTitle: () => null, // Hide page title in dialog
             }}
-            rows={allRows}
-            hasMore={hasMore}
-            loading={loading}
-            setPage={setPage}
-            setting={setting}
-            CurrentPage={CurrentPage}
-            length={metaData?.total}
-            name={tableName}
-            setSort={(e) => {
-              setPage(1);
-              setSort({ ...sort, ...e });
-            }}
-            currentRow={() => {}}
-            selectionManager={selectionManager}
-            setRefresh={setRefresh}
-            canSelect={true}
+            {...otherProps}
           />
         </Box>
       </DialogContent>
-      
-      <DialogActions>
-        <Button onClick={onClose} color="inherit">
+
+      <DialogActions
+        sx={{
+          borderTop: 1,
+          borderColor: 'divider',
+          p: 2,
+        }}
+      >
+        <Button onClick={handleClose} color="inherit">
           انصراف
         </Button>
-        <Button 
-          onClick={handleConfirm} 
+        <Button
+          onClick={handleConfirm}
           variant="contained"
-          disabled={minSelection && internalSelected.length < minSelection}
+          color="primary"
+          disabled={tempSelected.length === 0}
         >
-          تایید انتخاب ({internalSelected.length})
+          تایید انتخاب ({tempSelected.length})
         </Button>
       </DialogActions>
-      
-      {/* Create Dialog */}
-      {showCreateDialog && (
-        <Dialog
-          open={showCreateDialog}
-          onClose={() => setShowCreateDialog(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle>ایجاد {tableName} جدید</DialogTitle>
-          <DialogContent>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-              {createFields.map((field) => (
-                <TextField
-                  key={field.name}
-                  label={field.label}
-                  value={createData[field.name] || ''}
-                  onChange={(e) => setCreateData({
-                    ...createData,
-                    [field.name]: e.target.value
-                  })}
-                  required={field.required}
-                  multiline={field.multiline}
-                  rows={field.rows}
-                  type={field.type || 'text'}
-                  fullWidth
-                />
-              ))}
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setShowCreateDialog(false)}>
-              انصراف
-            </Button>
-            <Button 
-              onClick={handleCreate} 
-              variant="contained"
-              disabled={createLoading}
-            >
-              {createLoading ? <CircularProgress size={24} /> : 'ایجاد'}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
     </Dialog>
   );
 };

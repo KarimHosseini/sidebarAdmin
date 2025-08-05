@@ -1,15 +1,11 @@
-import AddIcon from "@mui/icons-material/Add";
-import { Button, CircularProgress, Paper } from "@mui/material";
-import { useEffect, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { Button, CircularProgress } from "@mui/material";
+import { useState } from "react";
 import { useSelector } from "react-redux";
-import { Modal, PageTitle } from "../../components/common";
-import Exports from "../../components/common/export";
-import CustomeLayout from "../../components/customeTable";
-import DataFetcher from "../../components/dataFetch";
+import { toast } from "react-toastify";
+import CustomePage from "../../components/customePage";
 import axiosInstance from "../../components/dataFetch/axiosInstance";
-import Filters from "../../components/filters";
-import NoAccess from "../../components/noAccess";
-import SyncButton from "../../components/sync";
+import { Modal } from "../../components/common";
 import {
   ALL_TIPAX,
   baseUrl,
@@ -17,214 +13,149 @@ import {
   EDIT_ACTIVE_TIPAX,
   EXPORT_TIPAX,
   TRACKING_TIPAX,
+  CREATE_TIPAX,
+  EDIT_TIPAX,
+  DELETE_TIPAX,
 } from "../../helpers/api-routes";
 import { configReq } from "../../helpers/functions";
-import EditTipaxModel from "./modal";
 
 const Tipax = () => {
   const { userPermissions } = useSelector((state) => state.relationals);
-  const [selected, setSelected] = useState([]);
-  // modals
-  const [openCreate, setOpenCreate] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [trackResualt, setTrackResualt] = useState([]);
-
   const { token } = useSelector((state) => state.user);
   const [loadingButton, setLoadingButton] = useState(false);
-  const [editingData, setEditingData] = useState({});
-  const [page, setPage] = useState(1);
+  const [open, setOpen] = useState(false);
+  const [trackResualt, setTrackResualt] = useState([]);
+  const [currentRowData, setCurrentRowData] = useState({});
   const [refreshData, setRefresh] = useState(0);
-  const [search, setsearch] = useState("");
-  const [sumbitSearch, setSumbitSearch] = useState("");
-  const [limit, setLimit] = useState(20);
-  const [filter, setFilter] = useState([]);
-  const [allRows, setAllRows] = useState([]);
-  const [sort, setSort] = useState({});
-  const {
-    hasMore,
-    loading,
-    allData,
-    CurrentPage,
-    metaData,
-    header,
-    setting,
-    extraObject,
-  } = DataFetcher(
-    limit,
-    page,
-    sort,
-    ALL_TIPAX,
-    filter,
-    true,
-    refreshData,
-    sumbitSearch
-  );
-  useEffect(() => {
-    setAllRows(allData);
-  }, [allData]);
-  const handleCheck = (id) => {
+
+  // تعریف APIها برای CustomePage
+  const apis = {
+    GET_DATA: ALL_TIPAX,
+    EXPORT_DATA: EXPORT_TIPAX,
+    EDIT_ACTIVE_DATA: EDIT_ACTIVE_TIPAX,
+    DELETE_ALL_DATA: EDIT_ACTIVE_ALL_TIPAX,
+    EDIT_ACTIVE_ALL_DATA: EDIT_ACTIVE_TIPAX,
+    CREATE_DATA: CREATE_TIPAX,
+    EDIT_DATA: EDIT_TIPAX,
+    DELETE_DATA: DELETE_TIPAX,
+  };
+
+  // تعریف فیلدهای فرم برای modal
+  const fields = [
+    {
+      name: 'traceCode',
+      label: 'کد رهگیری',
+      type: 'textInput',
+      required: true
+    },
+    {
+      name: 'secondaryTraceCode',
+      label: 'کد رهگیری ثانویه',
+      type: 'textInput',
+      required: false
+    },
+    {
+      name: 'customerSubstationCode',
+      label: 'کد مشتری',
+      type: 'textInput',
+      required: false
+    },
+    {
+      name: 'discountCode',
+      label: 'کد تخفیف',
+      type: 'textInput',
+      required: false
+    },
+    {
+      name: 'orderId',
+      label: 'شماره سفارش',
+      type: 'textInput',
+      required: false
+    }
+  ];
+
+  // تابع استعلام
+  const handleCheck = (tipaxWayBill) => {
     setLoadingButton(true);
     axiosInstance(
-      `${baseUrl}/${TRACKING_TIPAX}?orderId=${id}`,
+      `${baseUrl}/${TRACKING_TIPAX}?orderId=${tipaxWayBill}`,
       configReq(token)
     )
       .then((res) => {
         setLoadingButton(false);
         setTrackResualt(res.data);
+        setOpen(true);
       })
       .catch((err) => {
         setLoadingButton(false);
+        toast.error(err.response?.data?.message);
       });
   };
-  if (!userPermissions?.tipax?.view) {
-    return <NoAccess />;
-  }
+
+  // عملیات‌های اضافی برای ردیف‌ها
+  const extraActions = userPermissions?.tipax?.track
+    ? [
+        {
+          title: "استعلام",
+          handler: (
+            <Button
+              variant="contained"
+              disabled={loadingButton}
+              onClick={(rowData) => {
+                const data = rowData?.tipaxWayBill ? rowData : currentRowData;
+                handleCheck(data.tipaxWayBill);
+              }}
+            >
+              استعلام
+            </Button>
+          ),
+        },
+      ]
+    : [];
+
+  // کامپوننت برای نمایش اطلاعات اضافی
+  const extraDetails = (extraObject) => {
+    if (!extraObject) return null;
+    
+    return (
+      <div className="flex gap-4 items-center">
+        <span>آخرین بروزرسانی:</span>
+        <span className="font-bold">
+          {String(new Date(extraObject).getMinutes()).padStart(2, "0")}:
+          {String(new Date(extraObject).getHours()).padStart(2, "0")}
+        </span>
+        <span className="font-bold">
+          {new Date(extraObject)?.toLocaleDateString("fa-ir")}
+        </span>
+      </div>
+    );
+  };
 
   return (
     <>
-      <PageTitle
+      <CustomePage
+        apis={apis}
+        title="مشاهده سفارشات به تیپاکس"
+        canAdd={userPermissions?.tipax?.insert}
+        canEdit={userPermissions?.tipax?.update}
+        permissionsTag="tipax"
+        customeModal={false}
+        feilds={fields}
         broadCrumb={[
           {
-            title: " گزارشات",
+            title: "گزارشات",
             path: "/reports",
           },
         ]}
-        title=" مشاهده سفارشات به تیپاکس"
-      />
-      <div className="md:mx-3 mx-1">
-        <Paper
-          sx={{ border: "1px solid #dbdfea", mb: 1, padding: "15px 16px" }}
-          elevation={0}
-        >
-          <div className="flex md:gap-4 gap-1 flex-wrap justify-between">
-            <Filters
-              limit={limit}
-              setLimit={setLimit}
-              headers={header}
-              setFilter={setFilter}
-              filter={filter}
-              setPage={setPage}
-              loading={loading}
-            />
-            <div className="flex justify-end flex-wrap gap-4 items-center">
-              <SyncButton setRefresh={setRefresh} setting={setting} />
-              {extraObject && (
-                <div className="flex gap-4 items-center">
-                  <span> آخرین بروزرسانی :‌</span>
-                  <span className="font-bold">
-                    {" "}
-                    {String(new Date(extraObject).getMinutes()).padStart(
-                      2,
-                      "0"
-                    )}
-                    :{" "}
-                    {String(new Date(extraObject).getHours()).padStart(2, "0")}{" "}
-                  </span>
-                  <span className="font-bold">
-                    {new Date(extraObject)?.toLocaleDateString("fa-ir")}
-                  </span>
-                </div>
-              )}
-              {userPermissions?.tipax.export && (
-                <Exports
-                  sumbitSearch={sumbitSearch}
-                  filter={filter}
-                  header={header}
-                  data={allData}
-                  selectedData={selected}
-                  title=" مشاهده سفارشات به تیپاکس"
-                  api={EXPORT_TIPAX}
-                />
-              )}
-
-              {userPermissions?.tipax?.insert && (
-                <Button onClick={() => setOpenCreate(true)} variant="contained">
-                  <AddIcon />
-                  افزودن مشاهده سفارشات به تیپاکس جدید
-                </Button>
-              )}
-            </div>
-          </div>
-        </Paper>
-        <CustomeLayout
-          limit={limit}
-          setLimit={setLimit}
-          setAllRows={setAllRows}
-          editApi={userPermissions?.tipax?.update ? EDIT_ACTIVE_TIPAX : false}
-          title=" مشاهده سفارشات به تیپاکس"
-          headers={header}
-          setSearch={setsearch}
-          search={search}
-          page={page}
-          total_pages={metaData?.total_pages}
-          setApplySearch={(e) => {
-            setPage(1);
-            setSumbitSearch(e);
-            /* setFilter({ ...filter, search: { value: e, type: "lk" } }); */
-          }}
-          rows={allRows}
-          hasMore={hasMore}
-          loading={loading}
-          setPage={setPage}
-          setting={setting}
-          CurrentPage={CurrentPage}
-          actions={
-            userPermissions?.tipax?.track
-              ? [
-                  {
-                    title: "استعلام",
-                    handler: (
-                      <>
-                        <Button
-                          variant="contained"
-                          disabled={loadingButton}
-                          onClick={() => {
-                            handleCheck(editingData.tipaxWayBill);
-                            setOpen(true);
-                          }}
-                        >
-                          استعلام
-                        </Button>
-                      </>
-                    ),
-                  },
-                ]
-              : false
-          }
-          length={metaData?.total}
-          name={"تیپاکس"}
-          maxHeight={{ lg: "69.5vh", md: "68vh", xl: "74vh" }}
-          setSort={(e) => {
-            setPage(1);
-            setSort({ ...sort, ...e });
-          }}
-          currentRow={(data) => {
-            setEditingData(data);
-          }}
-          setSelected={setSelected}
-          selected={selected}
-          setRefresh={setRefresh}
-          deleteAllApi={
-            userPermissions?.tipax?.deleteAll ? EDIT_ACTIVE_ALL_TIPAX : null
-          }
-          editActiveAllApi={
-            userPermissions?.tipax?.activeAll ? EDIT_ACTIVE_TIPAX : null
-          }
-        />
-      </div>
-      <EditTipaxModel
-        open={openEdit || openCreate}
-        forEdit={openEdit}
-        data={editingData}
-        setAllRows={setAllRows}
-        allRows={allRows}
-        close={() => {
-          setOpenCreate(false);
-          setOpenEdit(false);
-          setEditingData({});
+        extraActions={extraActions}
+        extraDetails={extraDetails}
+        currentRow={(data) => {
+          setCurrentRowData(data);
         }}
+        key={refreshData}
       />
+
+      {/* Modal استعلام */}
       <Modal
         open={open}
         close={() => {
@@ -238,9 +169,8 @@ const Tipax = () => {
             <CircularProgress />
           ) : (
             <div className="flex my-4 flex-col gap-2">
-              {trackResualt?.map((item) => (
-                <span>
-                  {" "}
+              {trackResualt?.map((item, index) => (
+                <span key={index}>
                   - {item.status} / {item.trackingCode}
                 </span>
               ))}

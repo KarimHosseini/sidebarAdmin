@@ -1,203 +1,276 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Edit } from "@mui/icons-material";
-import AddIcon from "@mui/icons-material/Add";
-import { Button, IconButton, Paper } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { PageTitle } from "../../components/common";
-import Exports from "../../components/common/export";
-import CustomeLayout from "../../components/customeTable";
-import DataFetcher from "../../components/dataFetch";
+import CustomePage from "../../components/customePage";
 import axiosInstance from "../../components/dataFetch/axiosInstance";
-import Filters from "../../components/filters";
-import NoAccess from "../../components/noAccess";
-import SyncButton from "../../components/sync";
 import {
-  ALL_TELEGRAM_GROUP,
   baseUrl,
   EDIT_ACTIVE_SMS,
   EXPORT_GET_SMS,
   GET_SMS,
   GET_SMS_CENTER_TYPES,
   GET_SMS_PROVIDERS,
+  ALL_TELEGRAM_GROUP,
+  CREATE_SMS,
+  EDIT_SMS,
+  DELETE_SMS,
 } from "../../helpers/api-routes";
 import { configReq } from "../../helpers/functions";
-import SmsContentModal from "./modal";
+
 const SmsContent = () => {
   const { userPermissions } = useSelector((state) => state.relationals);
-  const [openCreate, setOpenCreate] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
-  const [sort, setSort] = useState({});
-  const [editingData, setEditingData] = useState({});
-  const [page, setPage] = useState(1);
-  const [search, setsearch] = useState("");
-  const [sumbitSearch, setSumbitSearch] = useState("");
-  const [limit, setLimit] = useState(20);
-  const [filter, setFilter] = useState([]);
-  const [allRows, setAllRows] = useState([]);
-  const [allTelegrams, setAllTelegrams] = useState([]);
-  const [providers, setProviders] = useState([]);
-  const [selected, setSelected] = useState([]);
-  const [refreshData, setRefresh] = useState(0);
-  const [smsType, setSmsType] = useState([]);
   const { token } = useSelector((state) => state.user);
+  const [smsTypes, setSmsTypes] = useState([]);
+  const [telegramGroups, setTelegramGroups] = useState([]);
+  const [providers, setProviders] = useState([]);
+  const [refreshData, setRefresh] = useState(0);
 
+  // بارگذاری داده‌های مورد نیاز
   useEffect(() => {
+    // بارگذاری انواع پیام
     axiosInstance(`${baseUrl}/${GET_SMS_CENTER_TYPES}`, configReq(token))
       .then((res) => {
-        setSmsType(res?.data.data);
+        setSmsTypes(res?.data.data || []);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        console.error('Error loading SMS types:', err);
+      });
+
+    // بارگذاری گروه‌های تلگرام
     axiosInstance(`${baseUrl}/${ALL_TELEGRAM_GROUP}`, configReq(token))
       .then((res) => {
-        setAllTelegrams(res?.data.data);
+        setTelegramGroups(res?.data.data || []);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        console.error('Error loading Telegram groups:', err);
+      });
+
+    // بارگذاری ارائه‌دهندگان پیامک
     axiosInstance(`${baseUrl}/${GET_SMS_PROVIDERS}`, configReq(token))
       .then((res) => {
-        setProviders(res?.data.data);
+        setProviders(res?.data.data || []);
       })
-      .catch((err) => {});
-  }, []);
-  const { hasMore, loading, allData, CurrentPage, metaData, header, setting } =
-    DataFetcher(
-      limit,
-      page,
-      sort,
-      GET_SMS,
-      filter,
-      true,
-      refreshData,
-      sumbitSearch
-    );
-  useEffect(() => {
-    setAllRows(allData);
-  }, [allData]);
-  if (!userPermissions?.sms?.view) {
-    return <NoAccess />;
-  }
-  return (
-    <>
-      <PageTitle
-        broadCrumb={[
-          {
-            title: "      پیام ها",
-            path: "/sms",
-          },
-        ]}
-        title="   مدیریت متون پیام ها"
-      />{" "}
-      <div className="md:mx-3 mx-1">
-        <Paper
-          sx={{ border: "1px solid #dbdfea", mb: 1, padding: "15px 16px" }}
-          elevation={0}
-        >
-          <div className="flex md:gap-4 gap-1 flex-wrap justify-between">
-            <Filters
-              limit={limit}
-              setLimit={setLimit}
-              headers={header}
-              setFilter={setFilter}
-              filter={filter}
-              setPage={setPage}
-              loading={loading}
-            />{" "}
-            <div className="flex justify-end flex-wrap gap-4 items-center">
-              <SyncButton setRefresh={setRefresh} setting={setting} />
-              {userPermissions?.sms.export && (
-                <Exports
-                  sumbitSearch={sumbitSearch}
-                  filter={filter}
-                  header={header}
-                  data={allData}
-                  selectedData={selected}
-                  title="پیام "
-                  api={EXPORT_GET_SMS}
-                />
-              )}
+      .catch((err) => {
+        console.error('Error loading SMS providers:', err);
+      });
+  }, [token]);
 
-              {userPermissions?.sms?.insert && (
-                <Button onClick={() => setOpenCreate(true)} variant="contained">
-                  <AddIcon />
-                  افزودن پیام جدید
-                </Button>
-              )}
-            </div>
-          </div>
-        </Paper>
-        <CustomeLayout
-          limit={limit}
-          setLimit={setLimit}
-          setAllRows={setAllRows}
-          editApi={userPermissions?.sms?.update ? EDIT_ACTIVE_SMS : false}
-          title=" مدیریت متون پیام ها "
-          headers={header}
-          setSearch={setsearch}
-          search={search}
-          page={page}
-          total_pages={metaData?.total_pages}
-          setApplySearch={(e) => {
-            setPage(1);
-            setSumbitSearch(e);
-            /* setFilter({ ...filter, search: { value: e, type: "lk" } }); */
-          }}
-          rows={allRows}
-          hasMore={hasMore}
-          loading={loading}
-          setPage={setPage}
-          setting={setting}
-          CurrentPage={CurrentPage}
-          actions={
-            userPermissions?.sms?.update
-              ? [
-                  {
-                    title: "ویرایش",
-                    handler: (
-                      <>
-                        <IconButton
-                          onClick={() => {
-                            setOpenEdit(true);
-                          }}
-                        >
-                          <Edit sx={{ color: "#ff2000" }} />
-                        </IconButton>
-                      </>
-                    ),
-                  },
-                ]
-              : false
-          }
-          length={metaData?.total}
-          name={"پیام"}
-          maxHeight={{ lg: "69.5vh", md: "68vh", xl: "74vh" }}
-          setSort={(e) => {
-            setPage(1);
-            setSort({ ...sort, ...e });
-          }}
-          setSelected={setSelected}
-          selected={selected}
-          currentRow={(data) => {
-            setEditingData(data);
-          }}
-          setRefresh={setRefresh}
-        />
-      </div>
-      <SmsContentModal
-        open={openEdit || openCreate}
-        forEdit={openEdit}
-        prevData={editingData}
-        setAllRows={setAllRows}
-        allRows={allRows}
-        providers={providers}
-        allTelegrams={allTelegrams}
-        smsType={smsType}
-        close={() => {
-          setOpenCreate(false);
-          setOpenEdit(false);
-          setEditingData({});
-        }}
-      />
-    </>
+  // تعریف APIها برای CustomePage
+  const apis = {
+    GET_DATA: GET_SMS,
+    EXPORT_DATA: EXPORT_GET_SMS,
+    EDIT_ACTIVE_DATA: EDIT_ACTIVE_SMS,
+    CREATE_DATA: CREATE_SMS,
+    EDIT_DATA: EDIT_SMS,
+    DELETE_DATA: DELETE_SMS,
+  };
+
+  // تعریف فیلدهای فرم برای modal
+  const fields = [
+    {
+      name: 'title',
+      label: 'عنوان',
+      type: 'textInput',
+      required: true
+    },
+    {
+      name: 'message',
+      label: 'متن پیام',
+      type: 'textInput',
+      required: false,
+      props: {
+        multiline: true,
+        rows: 4
+      }
+    },
+    {
+      name: 'target',
+      label: 'نوع پیام',
+      type: 'dropdown',
+      required: false,
+      options: smsTypes,
+      props: {
+        valueKey: 'id',
+        labelKey: 'title'
+      }
+    },
+    {
+      name: 'smsActive',
+      label: 'فعال بودن ارسال SMS',
+      type: 'switch',
+      required: false,
+      defaultValue: true
+    },
+    {
+      name: 'emailActive',
+      label: 'فعال بودن ارسال ایمیل',
+      type: 'switch',
+      required: false,
+      defaultValue: false
+    },
+    {
+      name: 'email',
+      label: 'متن ایمیل',
+      type: 'textInput',
+      required: false,
+      props: {
+        multiline: true,
+        rows: 3
+      },
+      conditional: (formData) => formData.emailActive
+    },
+    {
+      name: 'voiceActive',
+      label: 'فعال بودن پیام صوتی',
+      type: 'switch',
+      required: false,
+      defaultValue: false
+    },
+    {
+      name: 'voice',
+      label: 'متن پیام صوتی',
+      type: 'textInput',
+      required: false,
+      props: {
+        multiline: true,
+        rows: 3
+      },
+      conditional: (formData) => formData.voiceActive
+    },
+    {
+      name: 'sendToTelegram',
+      label: 'ارسال به تلگرام',
+      type: 'switch',
+      required: false,
+      defaultValue: false
+    },
+    {
+      name: 'telegramGroupIds',
+      label: 'گروه‌های تلگرام',
+      type: 'multipleDropdown',
+      required: false,
+      options: telegramGroups,
+      props: {
+        valueKey: 'id',
+        labelKey: 'title'
+      },
+      conditional: (formData) => formData.sendToTelegram
+    },
+    {
+      name: 'isUser',
+      label: 'مخصوص کاربر',
+      type: 'switch',
+      required: false,
+      defaultValue: false
+    },
+    {
+      name: 'active',
+      label: 'فعال / غیرفعال',
+      type: 'switch',
+      required: false,
+      defaultValue: true
+    },
+    // فیلدهای مربوط به ارائه‌دهندگان پیامک به صورت داینامیک
+    ...providers.flatMap(provider => [
+      {
+        name: `provider_${provider.id}_templateId`,
+        label: `آیدی قالب ${provider.title}`,
+        type: 'textInput',
+        required: false,
+        grid: { xs: 12, md: 6 }
+      },
+      {
+        name: `provider_${provider.id}_voiceTemplateId`,
+        label: `آیدی قالب ${provider.title} (صوتی)`,
+        type: 'textInput',
+        required: false,
+        grid: { xs: 12, md: 6 }
+      }
+    ])
+  ];
+
+  // مدیریت تغییر فرم
+  const handleFormChange = (fieldName, value, formData) => {
+    // تبدیل فیلدهای مربوط به ارائه‌دهندگان به فرمت مناسب
+    if (fieldName.startsWith('provider_')) {
+      const match = fieldName.match(/provider_(\d+)_(.+)/);
+      if (match) {
+        const providerId = parseInt(match[1]);
+        const fieldType = match[2];
+        
+        let templateRelations = formData.templateRelations || [];
+        const existingIndex = templateRelations.findIndex(
+          rel => rel.smsProviderId === providerId
+        );
+        
+        if (existingIndex !== -1) {
+          templateRelations[existingIndex][fieldType === 'templateId' ? 'providerTemplateId' : 'providerVoiceTemplateId'] = value;
+        } else if (value) {
+          templateRelations.push({
+            smsProviderId: providerId,
+            [fieldType === 'templateId' ? 'providerTemplateId' : 'providerVoiceTemplateId']: value
+          });
+        }
+        
+        return {
+          ...formData,
+          templateRelations
+        };
+      }
+    }
+    
+    // تبدیل telegramGroupIds به رشته
+    if (fieldName === 'telegramGroupIds' && Array.isArray(value)) {
+      return {
+        ...formData,
+        telegramGroupIds: value.join(',')
+      };
+    }
+    
+    return value;
+  };
+
+  // آماده‌سازی داده‌ها قبل از ارسال
+  const validateBeforeSubmit = (data, forEdit) => {
+    const submitData = {
+      ...data,
+      smsActive: data.smsActive || false,
+      emailActive: data.emailActive || false,
+      voiceActive: data.voiceActive || false,
+      sendToTelegram: data.sendToTelegram || false,
+      isUser: data.isUser || false,
+      active: data.active !== false
+    };
+    
+    // حذف فیلدهای provider_ از داده نهایی
+    Object.keys(submitData).forEach(key => {
+      if (key.startsWith('provider_')) {
+        delete submitData[key];
+      }
+    });
+    
+    return true;
+  };
+
+  return (
+    <CustomePage
+      apis={apis}
+      title="مدیریت متون پیام ها"
+      canAdd={userPermissions?.sms?.insert}
+      canEdit={userPermissions?.sms?.update}
+      permissionsTag="sms"
+      customeModal={false}
+      feilds={fields}
+      broadCrumb={[
+        {
+          title: "پیام ها",
+          path: "/sms",
+        },
+      ]}
+      onFormChange={handleFormChange}
+      validateBeforeSubmit={validateBeforeSubmit}
+      key={`sms-content-${refreshData}-${providers.length}-${smsTypes.length}-${telegramGroups.length}`}
+    />
   );
 };
 

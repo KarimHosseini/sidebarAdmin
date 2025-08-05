@@ -23,6 +23,7 @@ import TableRowdata from "./TableRowdata";
 import TableSearch from "./tableSearch";
 import { createAccordionManager } from "../utils/accordionManager";
 import { createCellManager } from "../utils/cellManager";
+import { createTablePerformanceManager } from "../utils/tablePerformanceManager";
 
 const CustomeLayout = ({
   title,
@@ -80,6 +81,17 @@ const CustomeLayout = ({
     })
   ).current;
 
+  // Create the performance manager for optimized rendering
+  const performanceManager = useRef(
+    createTablePerformanceManager({
+      enableVirtualScrolling: rows.length > 100,
+      batchSize: rows.length > 1000 ? 100 : 50,
+      rowHeight: setting?.TableType === "accordian" ? 60 : 53
+    })
+  ).current;
+
+  const tableRef = useRef(null);
+
   // Infinite scroll observer setup
   const observer = useRef();
   const lastRowElementRef = useCallback(
@@ -106,6 +118,17 @@ const CustomeLayout = ({
   const [allSync, setallSync] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [loaded, setLoaded] = useState(false);
+
+  // Initialize performance manager when table is mounted
+  useEffect(() => {
+    if (tableRef.current) {
+      performanceManager.initialize(tableRef.current);
+    }
+    
+    return () => {
+      performanceManager.destroy();
+    };
+  }, [performanceManager]);
 
   // Initialize DOM event listeners after component is mounted
   useEffect(() => {
@@ -151,52 +174,35 @@ const CustomeLayout = ({
           }
         });
         
-        // Initialize accordion buttons using accordionManager
-        accordionManager.initializeAccordions();
-        
-        // Initialize cell manager for table header resizing and column hiding
-        cellManager.initialize();
+        console.log("Checkbox listeners initialized");
       } finally {
-        // Always reset the flag
         isInitializing = false;
       }
     };
     
-    // Run only once after component mounts
-    const timerId = setTimeout(initializeCheckboxes, 300);
+    // Multiple strategies to ensure initialization happens
+    // 1. Immediate check (for when checkboxes are already in DOM)
+    if (document.querySelector('input[id^="checkbox-"]')) {
+      initializeCheckboxes();
+    }
     
-    // Much more targeted mutation observer that only watches for changes to checkboxes
+    // 2. After a short delay (backup for slow renders)
+    const timerId = setTimeout(() => {
+      console.log("Delayed initialization check");
+      initializeCheckboxes();
+    }, 100);
+    
+    // 3. MutationObserver for dynamic content
     const tableContainer = document.querySelector('.MuiTableContainer-root');
-    
     if (tableContainer) {
-      const observer = new MutationObserver((mutations) => {
-        // Only process if we're not already initializing
-        if (isInitializing) return;
-        
-        let hasNewElements = false;
-        
-        // Check if any checkboxes or accordion buttons were added that need initialization
-        mutations.forEach(mutation => {
-          if (mutation.type === 'childList') {
-            Array.from(mutation.addedNodes).forEach(node => {
-              if (node.querySelectorAll) {
-                const newCheckboxes = node.querySelectorAll('input[id^="checkbox-"]:not([data-initialized="true"])');
-                const newAccordions = node.querySelectorAll('.accordion-toggle-btn:not([data-am-initialized="true"])');
-                if (newCheckboxes.length > 0 || newAccordions.length > 0) {
-                  hasNewElements = true;
-                }
-              }
-            });
-          }
-        });
-        
-        // Only call initialize if we found new elements
-        if (hasNewElements) {
-          setTimeout(initializeCheckboxes, 50);
+      const observer = new MutationObserver(() => {
+        // Only initialize if we find checkboxes that aren't initialized
+        if (document.querySelector('input[id^="checkbox-"]:not([data-initialized])')) {
+          console.log("MutationObserver triggered initialization");
+          initializeCheckboxes();
         }
       });
       
-      // Only observe the table container, not the whole document
       observer.observe(tableContainer, { 
         childList: true, 
         subtree: true 
@@ -265,7 +271,13 @@ const CustomeLayout = ({
     
     // Use the syncUI method from the selection manager
     selectionManager.syncUI(rows.map(row => row.id));
-  }, [rows, selectionManager]);
+    
+    // Update performance manager with selection states
+    const selectedIds = selectionManager.getSelected();
+    rows.forEach(row => {
+      performanceManager.updateRowSelection(row.id, selectedIds.includes(row.id));
+    });
+  }, [rows, selectionManager, performanceManager]);
   
   // Call restore after data changes (sorting, filtering, pagination)
   useEffect(() => {
@@ -286,6 +298,11 @@ const CustomeLayout = ({
     
     return () => clearTimeout(restoreSelectionTimeout);
   }, [rows, forceRestoreSelectionState, accordionManager, cellManager, setting]);
+
+  // Optimize row updates using performance manager
+  const handleCellUpdate = useCallback((rowId, cellIndex, value) => {
+    performanceManager.updateCell(rowId, cellIndex, value);
+  }, [performanceManager]);
 
   return (
     <Paper
@@ -340,6 +357,7 @@ const CustomeLayout = ({
               }}
             >
               <Table
+                ref={tableRef}
                 stickyHeader
                 sx={{
                   minWidth: 950,
@@ -381,6 +399,7 @@ const CustomeLayout = ({
                         <TableRowdata
                           ref={rowRef}
                           setting={setting}
+                          performanceManager={performanceManager}
                           row={row}
                           selectionManager={selectionManager}
                           accordionManager={accordionManager}

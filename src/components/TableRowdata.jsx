@@ -30,13 +30,19 @@ const TableRowdata = forwardRef(
       selectionManager,
       accordionManager,
       neededFields = [],
+      performanceManager,
     },
     ref
   ) => {
     const checkboxRef = useRef(null);
+    const rowRef = useRef(null);
     
-
-
+    // Set data-row-id attribute for performance manager
+    useEffect(() => {
+      if (rowRef.current && row.id) {
+        rowRef.current.setAttribute('data-row-id', row.id);
+      }
+    }, [row.id]);
     
     useEffect(() => {
       if (!canSelect || !checkboxRef.current || !row.id) return;
@@ -59,13 +65,18 @@ const TableRowdata = forwardRef(
       // Attach event listener
       checkboxRef.current.addEventListener('click', (e) => {
         selectionManager.handleCheckboxClick(e);
+        // Update performance manager
+        if (performanceManager) {
+          performanceManager.updateRowSelection(row.id, e.target.checked);
+        }
       });
-    }, [canSelect, row.id, selectionManager]);
+    }, [canSelect, row.id, selectionManager, performanceManager]);
 
 
     return (
       <>
         <TableRow
+          ref={rowRef}
           sx={{
             "& > *": {
               borderBottom:
@@ -102,165 +113,121 @@ const TableRowdata = forwardRef(
               />
             </TableCell>
           )}
-          
           {headers.map((item, i) => {
-            if (
-              row[item.name] !== undefined &&
-              item.showInList &&
-              !item.showInExtra
-            ) {
+            if (item.showInList && !item.showInExtra) {
               return (
-                <Fragment key={i + "condi"}>
-                  <TableCell
-                    onClick={() => {
-                      // No longer needed - accordion state is managed by the accordionManager
+                <Fragment key={i + "TableRowdataTableCelldata"}>
+                  <TableCelldata
+                    row={row}
+                    item={item}
+                    index={i}
+                    rows={rows}
+                    setAllRows={setAllRows}
+                    editApi={editApi}
+                    editInputApi={editInputApi}
+                    performanceManager={performanceManager}
+                    onCellUpdate={(value) => {
+                      if (performanceManager) {
+                        performanceManager.updateCell(row.id, i, value);
+                      }
                     }}
-                    colSpan={item.colSpan || 1}
-                  >
-                    <TableCelldata
-                      row={row}
-                      item={item}
-                      rows={rows}
-                      setAllRows={setAllRows}
-                      editApi={editApi}
-                      editInputApi={editInputApi}
-                    />
-                  </TableCell>
-                </Fragment>
-              );
-            } else {
-              return (
-                <Fragment key={i + "vdsvsd"}>
-                  <TableCell
-                    sx={{
-                      width: "0px !important",
-                      padding: "0px !important",
-                    }}
-                  ></TableCell>
+                  />
+                  {Array.from(Array(item.colSpan - 1).keys()).map(
+                    (item, index) => (
+                      <TableCell
+                        key={index + "EmptyTableCell"}
+                        sx={{ padding: "0px !important" }}
+                      >
+                        <></>
+                      </TableCell>
+                    )
+                  )}
                 </Fragment>
               );
             }
           })}
-                    {actions && (
-            <>
-              {actions?.map((action, idx) => {
-                // Create data attributes object from neededFields
-                const dataAttributes = {};
-                neededFields.forEach(field => {
-                  if (row[field] !== undefined) {
-                    dataAttributes[`data-${field.toLowerCase()}`] = row[field];
-                  }
-                });
 
-                return (
-                  <TableCell id={`action-cell-${index}`} key={idx + "actionBody"}>
-                    <div {...dataAttributes} style={{ display: 'inline-block' }}>
-                      {action?.handler}
-                    </div>
-                  </TableCell>
-                );
-              })}
-            </>
+          {actions &&
+            actions.map((action, index) => (
+              <TableCell align="center" key={index + "ActionTableCell"}>
+                {typeof action.handler === "function"
+                  ? action.handler(row)
+                  : React.cloneElement(action.handler, {
+                      onClick: action.handler.props.onClick.bind(null, row),
+                    })}
+              </TableCell>
+            ))}
+          {setting?.sync && (
+            <TableCell align="center" key={index + "SyncTableCell"}>
+              <Box sx={{ width: 100 }} onClick={() => getSync(row.id)}>
+                آخرین بروزرسانی همگام سازی
+              </Box>
+            </TableCell>
           )}
-          {setting?.TableType === "accordian" ? (
-            <TableCell>
+          {setting?.TableType === "accordian" && (
+            <TableCell sx={{ padding: 0 }}>
               <button
                 className="accordion-toggle-btn"
-                data-row-id={row.id}
-                data-index={index}
-                aria-label="expand row"
                 style={{
-                  background: 'transparent',
                   border: 'none',
+                  background: 'transparent',
                   cursor: 'pointer',
-                  display: 'inline-flex',
+                  padding: '4px',
+                  display: 'flex',
                   alignItems: 'center',
-                  padding: '8px'
+                  justifyContent: 'center'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  accordionManager.toggle(row.id);
                 }}
               >
-                <ArrowDropDownIcon />
-              
+                <ArrowDropDownIcon 
+                  sx={{ 
+                    transition: 'transform 0.3s',
+                    transform: accordionManager.isOpen(row.id) ? 'rotate(180deg)' : 'rotate(0deg)'
+                  }} 
+                />
               </button>
             </TableCell>
-          ) : (
-            <></>
           )}
         </TableRow>
-
-        {setting?.TableType === "accordian" ? (
-          <TableRow 
-            id={`accordion-row-${row.id}`}
-            onMouseDown={() => currentRow(row)}
-          >
-            <TableCell style={{ padding: 0 }} colSpan={500}>
-              {/* The display property will be controlled by the accordionManager directly in the DOM */}
+        {setting?.TableType === "accordian" && (
+          <TableRow>
+            <TableCell
+              sx={{ padding: "0px !important" }}
+              colSpan={headers.filter(h => h.showInList).length + (actions ? actions.length : 0) + (canSelect ? 1 : 0) + 2}
+            >
               <div 
-                id={`accordion-content-${row.id}`}
-                style={{ display: 'none' }}
+                className="accordion-content" 
+                data-accordion-id={row.id}
+                style={{
+                  maxHeight: '0px',
+                  overflow: 'hidden',
+                  transition: 'max-height 0.3s ease-out'
+                }}
               >
-                <Box
-                  sx={{
-                    background: (theme) =>
-                      theme.palette.mode === "light"
-                        ? "rgb(239 246 255)"
-                        : "rgb(32 44 85)",
-                  }}
-                  className="flex gap-8 mb-4 p-4 border-t border-dashed"
-                >
-                  <div className="flex items-center gap-4 flex-wrap">
-                    {headers.map((item, i) => {
-                      if (
-                        row[item.name] !== undefined &&
-                        item.showInList &&
-                        item.showInExtra
-                      ) {
-                        return (
-                          <Fragment key={i + "dsvsdvds11"}>
-                            <span className="text-[#8c8c8c]">
-                              {item.title} :{" "}
-                            </span>
-                            <span className="font-bold">
-                              {" "}
-                              <TableCelldata
-                                row={row}
-                                item={item}
-                                rows={rows}
-                                setAllRows={setAllRows}
-                                editApi={editApi}
-                                editInputApi={editInputApi}
-                              />
-                            </span>
-                          </Fragment>
-                        );
-                      }
-                    })}
-                  </div>
+                <Box sx={{ p: 2 }}>
+                  {/* Render extra fields that are not shown in the main table */}
+                  {headers.map((item, index) => {
+                    if (item.showInExtra) {
+                      return (
+                        <Box key={index} sx={{ mb: 1 }}>
+                          <strong>{item.title}: </strong>
+                          {row[item.name] || '-'}
+                        </Box>
+                      );
+                    }
+                    return null;
+                  })}
                 </Box>
               </div>
             </TableCell>
           </TableRow>
-        ) : (
-          <></>
         )}
       </>
     );
   }
 );
 
-// Custom comparison function that ignores selectionManager and accordionManager changes
-const areEqual = (prevProps, nextProps) => {
-  // Never re-render when selections or accordion states change
-  // Instead, we'll directly manipulate the DOM without React
-  
-  // We only care about:
-  // 1. Changes to the data itself
-  // 2. Other props that would legitimately require a re-render
-  return (
-    prevProps.row.id === nextProps.row.id &&
-    prevProps.index === nextProps.index
-    // We don't check selectionManager, accordionManager, or open state on purpose
-  );
-};
-
-// Use React.memo with our custom comparison function to prevent unnecessary re-renders
-export default React.memo(TableRowdata, areEqual);
+export default TableRowdata;

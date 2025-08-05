@@ -9,6 +9,7 @@ import {
   Skeleton,
   Typography,
 } from "@mui/material";
+import WidgetMenu from './components/WidgetMenu';
 import { Box } from "@mui/system";
 import { AnimatePresence, motion } from "framer-motion";
 import momentJalaali from "moment-jalaali";
@@ -174,13 +175,19 @@ const WidgetOrdersSummary = () => {
                       </Box>
 
                       <Box className="flex items-center">
-                        <IconButton
-                          size="small"
-                          onClick={() => setRefresh((r) => r + 1)}
-                          sx={{ mr: 1, color: "#b9b9b9" }}
-                        >
-                          <RefreshIcon />
-                        </IconButton>
+                        <WidgetMenu
+                          onRefresh={() => setRefresh((r) => r + 1)}
+                          onExport={() => {
+                            // Implement export functionality
+                            console.log('Export orders summary data');
+                          }}
+                          customMenuItems={[
+                            {
+                              label: 'نمایش جزئیات',
+                              onClick: () => handleToggleExpand(index)
+                            }
+                          ]}
+                        />
                       </Box>
                     </Box>
 

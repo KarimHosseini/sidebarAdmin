@@ -2,6 +2,7 @@ import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Box, IconButton, Paper, Skeleton, useMediaQuery } from "@mui/material";
+import WidgetMenu from './components/WidgetMenu';
 import {
   BarElement,
   CategoryScale,
@@ -232,24 +233,25 @@ const WidgetTopProduct = () => {
         >
           <KeyboardArrowLeftIcon />
         </IconButton>
-        <IconButton
-          sx={{
-            position: "absolute",
-            top: "30px",
-            right: "35px",
-            transform: "translateY(-50%)",
-            color: "#b9b9b9",
-            opacity: { md: "0", xs: "100" },
-            transition: "opacity 400ms",
-          }}
-          className="refreshButton "
-          onClick={() => {
+        <WidgetMenu
+          onRefresh={() => {
             setyears(Number(d.split("/")[2].slice(0, 4)));
             setTime(Number(d.split("/")[0]));
           }}
-        >
-          <RefreshIcon />
-        </IconButton>
+          onExport={() => {
+            // Implement export functionality
+            console.log('Export top products data');
+          }}
+          customMenuItems={[
+            {
+              label: 'نمایش جدول',
+              onClick: () => {
+                // Toggle between chart and table view
+                console.log('Toggle view');
+              }
+            }
+          ]}
+        />
         <SwitchAccessShortcutAddOutlinedIcon
           sx={{
             position: "absolute",

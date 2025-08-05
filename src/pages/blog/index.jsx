@@ -1,184 +1,206 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Edit } from "@mui/icons-material";
-import AddIcon from "@mui/icons-material/Add";
-import { Button, IconButton, Paper } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Button } from "@mui/material";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { PageTitle } from "../../components/common";
-import Exports from "../../components/common/export";
-import CustomeLayout from "../../components/customeTable";
-import DataFetcher from "../../components/dataFetch";
-import Filters from "../../components/filters";
-import NoAccess from "../../components/noAccess";
-import SyncButton from "../../components/sync";
+import CustomePage from "../../components/customePage";
+import axiosInstance from "../../components/dataFetch/axiosInstance";
 import {
   EDIT_ACTIVE_BLOG,
   EXPORT_BLOG,
   GET_BLOG,
+  CREATE_BLOG,
+  EDIT_BLOG,
+  DELETE_BLOG,
+  GET_BLOG_CATEGORY,
+  ALL_USERS,
+  baseUrl,
 } from "../../helpers/api-routes";
+import { configReq } from "../../helpers/functions";
+import { toast } from "react-toastify";
+import RedirectModal from "../../components/blogs/redirect";
 
 const Blogs = () => {
   const { userPermissions } = useSelector((state) => state.relationals);
-
+  const { token } = useSelector((state) => state.user);
   const [editingData, setEditingData] = useState({});
-  const [page, setPage] = useState(1);
-  const [filter, setFilter] = useState([]);
-  const [sort, setSort] = useState({});
-  const [search, setsearch] = useState("");
-  const [sumbitSearch, setSumbitSearch] = useState("");
-  const [limit, setLimit] = useState(20);
-  const [allRows, setAllRows] = useState([]);
-  const [selected, setSelected] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [users, setUsers] = useState([]);
   const [refreshData, setRefresh] = useState(0);
-  const navigate = useNavigate();
-  const { hasMore, loading, allData, CurrentPage, metaData, header, setting } =
-    DataFetcher(
-      limit,
-      page,
-      sort,
-      GET_BLOG,
-      filter,
-      true,
-      refreshData,
-      sumbitSearch
-    );
-  useEffect(() => {
-    setAllRows(allData);
-  }, [allData]);
 
-  if (!userPermissions?.blog?.view) {
-    return <NoAccess />;
-  }
+  // بارگذاری دسته‌بندی‌ها و کاربران
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = () => {
+    // بارگذاری دسته‌بندی‌های بلاگ
+    axiosInstance
+      .get(`${baseUrl}/${GET_BLOG_CATEGORY}?Page=1&Limit=2000`, configReq(token))
+      .then((res) => {
+        setCategories(res.data.data || []);
+      })
+      .catch((err) => {
+        toast.error(err.response?.data?.message);
+      });
+
+    // بارگذاری کاربران
+    axiosInstance
+      .get(`${baseUrl}/${ALL_USERS}?Page=1&Limit=2000`, configReq(token))
+      .then((res) => {
+        setUsers(res.data.data || []);
+      })
+      .catch((err) => {});
+  };
+
+  // تعریف APIها برای CustomePage
+  const apis = {
+    GET_DATA: GET_BLOG,
+    EXPORT_DATA: EXPORT_BLOG,
+    EDIT_ACTIVE_DATA: EDIT_ACTIVE_BLOG,
+    CREATE_DATA: CREATE_BLOG,
+    EDIT_DATA: EDIT_BLOG,
+    DELETE_DATA: DELETE_BLOG,
+  };
+
+  // تعریف فیلدهای فرم
+  const fields = [
+    {
+      name: 'title',
+      label: 'عنوان بلاگ',
+      type: 'textInput',
+      required: true
+    },
+    {
+      name: 'url',
+      label: 'نشانی بلاگ',
+      type: 'textInput',
+      required: true,
+      validation: (value) => {
+        if (!value.startsWith('/')) {
+          return 'نشانی باید با / شروع شود';
+        }
+        return true;
+      }
+    },
+    {
+      name: 'blogCategoryId',
+      label: 'دسته‌بندی',
+      type: 'dropdown',
+      required: true,
+      options: categories,
+      props: {
+        valueKey: 'id',
+        labelKey: 'title'
+      }
+    },
+    {
+      name: 'summery',
+      label: 'خلاصه',
+      type: 'textInput',
+      required: false,
+      props: {
+        multiline: true,
+        rows: 3
+      }
+    },
+    {
+      name: 'blogContent',
+      label: 'محتوای بلاگ',
+      type: 'editor',
+      required: true
+    },
+    {
+      name: 'selected',
+      label: 'بلاگ برگزیده',
+      type: 'switch',
+      required: false,
+      defaultValue: false
+    },
+    {
+      name: 'active',
+      label: 'فعال',
+      type: 'switch',
+      required: false,
+      defaultValue: true
+    },
+    {
+      name: 'galleryId',
+      label: 'تصویر',
+      type: 'uploader',
+      required: false
+    }
+  ];
+
+  // عملیات‌های اضافی برای ردیف‌ها  
+  const extraActions = [
+    userPermissions?.seoAssign?.view && {
+      title: "seo",
+      handler: (
+        <Button
+          onClick={(rowData) => {
+            const data = rowData?.id ? rowData : editingData;
+            window.open(
+              `/seoGenrator?id=${data?.id}&name=blog&slug=${data?.url?.slice(1)}`
+            );
+          }}
+          variant="outlined"
+        >
+          ویرایش seo
+        </Button>
+      ),
+    },
+  ].filter((item) => item);
+
+  // برای مدیریت redirect
+  const [openRedirect, setOpenRedirect] = useState(false);
+  const [redirectData, setRedirectData] = useState({});
+
+  // مدیریت بعد از ذخیره
+  const onAfterSubmit = (data, isEdit) => {
+    if (!isEdit && data?.url) {
+      setRedirectData(data);
+      setOpenRedirect(true);
+    }
+    setRefresh(r => r + 1);
+  };
+
   return (
     <>
-      <PageTitle
-        title=" بلاگ"
+      <CustomePage
+        apis={apis}
+        title="بلاگ"
+        canAdd={userPermissions?.blog?.insert}
+        canEdit={userPermissions?.blog?.update}
+        permissionsTag="blog"
+        customeModal={false}
+        feilds={fields}
         broadCrumb={[
           {
             title: "مدیریت بلاگ",
             path: "/blog",
           },
         ]}
+        extraActions={extraActions}
+        currentRow={(data) => {
+          setEditingData(data);
+        }}
+        onAfterSubmit={onAfterSubmit}
+        key={`blog-${refreshData}-${categories?.length}`}
       />
-      <div className="md:mx-3 mx-1">
-        <Paper
-          sx={{ border: "1px solid #dbdfea", mb: 1, padding: "15px 16px" }}
-          elevation={0}
-        >
-          <div className="flex md:gap-4 gap-1 flex-wrap justify-between">
-            <Filters
-              limit={limit}
-              setLimit={setLimit}
-              headers={header}
-              setFilter={setFilter}
-              filter={filter}
-              setPage={setPage}
-              loading={loading}
-            />
-            <div className="flex justify-end flex-wrap gap-4 items-center">
-              <SyncButton setRefresh={setRefresh} setting={setting} />
-              {userPermissions?.blog?.export && (
-                <Exports
-                  sumbitSearch={sumbitSearch}
-                  filter={filter}
-                  header={header}
-                  data={allData}
-                  selectedData={selected}
-                  title=""
-                  api={EXPORT_BLOG}
-                />
-              )}
 
-              {userPermissions?.blog?.insert && (
-                <Button
-                  onClick={() => navigate("/blog/create")}
-                  variant="contained"
-                > 
-                  <AddIcon />
-                  افزودن بلاگ جدید
-                </Button>
-              )}
-            </div>
-          </div>
-        </Paper>
-        <CustomeLayout
-          limit={limit}
-          setLimit={setLimit}
-          setAllRows={setAllRows}
-          editApi={userPermissions?.blog?.update ? EDIT_ACTIVE_BLOG : false}
-          title=" بلاگ"
-          headers={header}
-          setSearch={setsearch}
-          search={search}
-          page={page}
-          total_pages={metaData?.total_pages}
-          setApplySearch={(e) => {
-            setPage(1);
-            setSumbitSearch(e);
-            /* setFilter({ ...filter, search: { value: e, type: "lk" } }); */
-          }}
-          rows={allRows || []}
-          hasMore={hasMore}
-          loading={loading}
-          setPage={setPage}
-          setting={setting}
-          CurrentPage={CurrentPage}
-          actions={
-            userPermissions?.blog?.update || userPermissions?.seoAssign?.view
-              ? [
-                  userPermissions?.blog?.update && {
-                    title: "ویرایش",
-                    handler: (
-                      <>
-                        <IconButton
-                          onClick={() => navigate(`/blog/${editingData.id}`)}
-                        >
-                          <Edit sx={{ color: "#ff2000" }} />
-                        </IconButton>
-                      </>
-                    ),
-                  },
-                  userPermissions?.seoAssign?.view && {
-                    title: "seo",
-                    handler: (
-                      <Button
-                        onClick={(rowData) =>
-                        {
-                          const data = rowData?.id ? rowData : editingData;
-                          window.open(
-                            `/seoGenrator?id=${
-                              data?.id
-                            }&name=blog&slug=${data?.url.slice(1)}`
-                          )
-                        }
-                        }
-                        variant="outlined"
-                      >
-                        ویرایش seo
-                      </Button>
-                    ),
-                  },
-                ].filter((item) => item)
-              : false
-          }
-          length={metaData?.total}
-          name={" "}
-          maxHeight={{ lg: "69.5vh", md: "68vh", xl: "74vh" }}
-          setSort={(e) => {
-            setPage(1);
-            setSort({ ...sort, ...e });
-          }}
-          currentRow={(data) => {
-            setEditingData(data);
-          }}
-          setRefresh={setRefresh}
-          setSelected={setSelected}
-          selected={selected}
-        />
-      </div>
+      <RedirectModal
+        open={openRedirect}
+        name="url"
+        data={redirectData}
+        close={() => {
+          setOpenRedirect(false);
+          setRedirectData({});
+        }}
+      />
     </>
   );
 };
 
 export default Blogs;
+
+// تسک 1: صفحه blog به فرم ژنراتور تبدیل شد ✓

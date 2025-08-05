@@ -1,17 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Edit } from "@mui/icons-material";
-import AddIcon from "@mui/icons-material/Add";
-import { Button, IconButton, Paper } from "@mui/material";
+import { Button } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { PageTitle } from "../../components/common";
-import Exports from "../../components/common/export";
-import CustomeLayout from "../../components/customeTable";
-import DataFetcher from "../../components/dataFetch";
+import CustomePage from "../../components/customePage";
 import axiosInstance from "../../components/dataFetch/axiosInstance";
-import Filters from "../../components/filters";
-import NoAccess from "../../components/noAccess";
-import SyncButton from "../../components/sync";
 import {
   ALL_GUARANTOR,
   baseUrl,
@@ -19,244 +11,294 @@ import {
   EDIT_ACTIVE_FACILITIES_PARENT,
   EXPORT_FACILITIES_PARENT,
   GET_FACILITIES_PARENT,
+  CREATE_FACILITIES_PARENT,
+  EDIT_FACILITIES_PARENT,
+  DELETE_FACILITIES_PARENT,
   GET_Financier,
 } from "../../helpers/api-routes";
 import { configReq } from "../../helpers/functions";
 import InsuranceModal from "./insuranceModal";
-import FaciltyParentModal from "./modal";
+
 const FacilityParent = () => {
   const { userPermissions } = useSelector((state) => state.relationals);
-
-  // modals
-  const [openCreate, setOpenCreate] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
+  const { token } = useSelector((state) => state.user);
+  
   const [open, setOpen] = useState(false);
-
-  const [refreshData, setRefresh] = useState(0);
-  const [editingData, setEditingData] = useState({});
-  const [page, setPage] = useState(1);
-  const [search, setsearch] = useState("");
-  const [sumbitSearch, setSumbitSearch] = useState("");
-  const [limit, setLimit] = useState(20);
-  const [filter, setFilter] = useState([]);
-  const [allRows, setAllRows] = useState([]);
-  const [selected, setSelected] = useState([]);
   const [gateWays, setGateWays] = useState([]);
   const [financier, setFinancier] = useState([]);
   const [guarantors, setGuarantors] = useState([]);
-  const { token } = useSelector((state) => state.user);
+  const [editingData, setEditingData] = useState({});
+  const [refreshData, setRefresh] = useState(0);
 
-  const [sort, setSort] = useState({});
-  const { hasMore, loading, allData, CurrentPage, metaData, header, setting } =
-    DataFetcher(
-      limit,
-      page,
-      sort,
-      GET_FACILITIES_PARENT,
-      filter,
-      true,
-      refreshData,
-      sumbitSearch
-    );
-  useEffect(() => {
-    setAllRows(allData);
-  }, [allData]);
+  // بارگذاری داده‌های اولیه
   useEffect(() => {
     getAllGateWays();
   }, []);
-  const getAllGateWays = () => {
-    axiosInstance
-      .get(
-        `${baseUrl}/${CATEGORIES}?Page=1&Limit=10000`,
 
-        configReq(token)
-      )
+  const getAllGateWays = () => {
+    // بارگذاری دسته‌بندی‌ها
+    axiosInstance
+      .get(`${baseUrl}/${CATEGORIES}?Page=1&Limit=10000`, configReq(token))
       .then((res) => {
         setGateWays(res.data.data);
       })
       .catch((err) => {});
+      
+    // بارگذاری تامین‌کنندگان
     axiosInstance
-      .get(
-        `${baseUrl}/${GET_Financier}?Page=1&Limit=10000`,
-
-        configReq(token)
-      )
+      .get(`${baseUrl}/${GET_Financier}?Page=1&Limit=10000`, configReq(token))
       .then((res) => {
         setFinancier(res.data.data);
       })
       .catch((err) => {});
+      
+    // بارگذاری ضامن‌ها
     axiosInstance
-      .get(
-        `${baseUrl}/${ALL_GUARANTOR}?Page=1&Limit=10000`,
-
-        configReq(token)
-      )
+      .get(`${baseUrl}/${ALL_GUARANTOR}?Page=1&Limit=10000`, configReq(token))
       .then((res) => {
         setGuarantors(res.data.data);
       })
       .catch((err) => {});
   };
-  if (!userPermissions?.LoanSettings?.view) {
-    return <NoAccess />;
-  }
+
+  // تعریف APIها برای CustomePage
+  const apis = {
+    GET_DATA: GET_FACILITIES_PARENT,
+    EXPORT_DATA: EXPORT_FACILITIES_PARENT,
+    EDIT_ACTIVE_DATA: EDIT_ACTIVE_FACILITIES_PARENT,
+    CREATE_DATA: CREATE_FACILITIES_PARENT,
+    EDIT_DATA: EDIT_FACILITIES_PARENT,
+    DELETE_DATA: DELETE_FACILITIES_PARENT,
+  };
+
+  // تعریف فیلدهای فرم
+  const fields = [
+    {
+      name: 'Title',
+      label: 'عنوان',
+      type: 'textInput',
+      required: true
+    },
+    {
+      name: 'shortName',
+      label: 'نام کوتاه',
+      type: 'textInput',
+      required: false
+    },
+    {
+      name: 'ChargeType',
+      label: 'نوع شارژ',
+      type: 'dropdown',
+      required: false,
+      options: [
+        { id: 0, title: 'نوع 0' },
+        { id: 1, title: 'نوع 1' },
+        { id: 2, title: 'نوع 2' }
+      ],
+      props: {
+        valueKey: 'id',
+        labelKey: 'title'
+      }
+    },
+    {
+      name: 'ChargeTypeModel',
+      label: 'مدل نوع شارژ',
+      type: 'numberInput',
+      required: false
+    },
+    {
+      name: 'financierId',
+      label: 'تامین کننده',
+      type: 'dropdown',
+      required: false,
+      options: financier,
+      props: {
+        valueKey: 'id',
+        labelKey: 'title'
+      }
+    },
+    {
+      name: 'hasGurantor',
+      label: 'دارای ضامن',
+      type: 'switch',
+      required: false,
+      defaultValue: false
+    },
+    {
+      name: 'guarantorId',
+      label: 'ضامن',
+      type: 'dropdown',
+      required: false,
+      options: guarantors,
+      props: {
+        valueKey: 'id',
+        labelKey: 'title'
+      },
+      conditional: (formData) => formData.hasGurantor
+    },
+    {
+      name: 'MaxLoanAmount',
+      label: 'حداکثر مبلغ وام',
+      type: 'numberInput',
+      required: false,
+      props: {
+        suffix: 'تومان'
+      }
+    },
+    {
+      name: 'YearlyProfit',
+      label: 'سود سالانه',
+      type: 'numberInput',
+      required: false,
+      props: {
+        suffix: 'درصد'
+      }
+    },
+    {
+      name: 'MonthCountPreview',
+      label: 'تعداد ماه پیش‌نمایش',
+      type: 'numberInput',
+      required: false
+    },
+    {
+      name: 'maxAgeToSubmit',
+      label: 'حداکثر سن برای ثبت',
+      type: 'numberInput',
+      required: false
+    },
+    {
+      name: 'Order',
+      label: 'ترتیب',
+      type: 'numberInput',
+      required: false
+    },
+    {
+      name: 'Link',
+      label: 'لینک',
+      type: 'textInput',
+      required: false
+    },
+    {
+      name: 'CategoryIds',
+      label: 'دسته‌بندی‌ها',
+      type: 'dropdown',
+      required: false,
+      options: gateWays,
+      props: {
+        valueKey: 'id',
+        labelKey: 'title',
+        multiple: true
+      }
+    },
+    {
+      name: 'Description',
+      label: 'توضیحات',
+      type: 'editor',
+      required: false
+    },
+    {
+      name: 'GetFacilityDescription',
+      label: 'توضیحات دریافت تسهیلات',
+      type: 'editor',
+      required: false
+    },
+    {
+      name: 'showChargeWallet',
+      label: 'نمایش شارژ کیف پول',
+      type: 'switch',
+      required: false,
+      defaultValue: false
+    },
+    {
+      name: 'HasPreFactor',
+      label: 'دارای پیش فاکتور',
+      type: 'switch',
+      required: false,
+      defaultValue: false
+    },
+    {
+      name: 'CanUseFacilityWallet',
+      label: 'امکان استفاده از کیف پول تسهیلات',
+      type: 'switch',
+      required: false,
+      defaultValue: false
+    },
+    {
+      name: 'IsActive',
+      label: 'فعال',
+      type: 'switch',
+      required: false,
+      defaultValue: true
+    },
+    {
+      name: 'Files',
+      label: 'تصویر',
+      type: 'uploader',
+      required: false
+    },
+    {
+      name: 'CardImage',
+      label: 'تصویر کارت',
+      type: 'uploader',
+      required: false
+    }
+  ];
+
+  // عملیات‌های اضافی برای ردیف‌ها
+  const extraActions = userPermissions?.LoanSettings?.edit
+    ? [
+        {
+          title: "خدمات های اجباری",
+          handler: (
+            <Button
+              onClick={() => setOpen(true)}
+              variant="outlined"
+              color="secondary"
+            >
+              مشاهده
+            </Button>
+          ),
+        },
+        {
+          title: "تسهیلات",
+          handler: (
+            <Button
+              onClick={(rowData) => {
+                const data = rowData?.id ? rowData : editingData;
+                window.open(`/facilitySetting/${data.id}?title=${data.title}`);
+              }}
+              variant="outlined"
+            >
+              مشاهده
+            </Button>
+          ),
+        },
+      ]
+    : [];
+
   return (
     <>
-      <PageTitle
+      <CustomePage
+        apis={apis}
+        title="تنظیمات تسهیلات"
+        canAdd={userPermissions?.LoanSettings?.add}
+        canEdit={userPermissions?.LoanSettings?.update}
+        permissionsTag="LoanSettings"
+        customeModal={false}
+        feilds={fields}
         broadCrumb={[
           {
-            title: "  تسهیلات",
+            title: "تسهیلات",
             path: "/facilitySetting",
           },
         ]}
-        title=" تنظیمات تسهیلات  "
-      />
-      <div className="md:mx-3 mx-1">
-        <Paper
-          sx={{ border: "1px solid #dbdfea", mb: 1, padding: "15px 16px" }}
-          elevation={0}
-        >
-          {" "}
-          <div className="flex md:gap-4 gap-1 flex-wrap justify-between">
-            <Filters
-              limit={limit}
-              setLimit={setLimit}
-              headers={header}
-              setFilter={setFilter}
-              filter={filter}
-              setPage={setPage}
-              loading={loading}
-            />
-            <div className="flex justify-end flex-wrap gap-4 items-center">
-              <SyncButton setRefresh={setRefresh} setting={setting} />
-              {userPermissions?.LoanSettings?.export && (
-                <Exports
-                  sumbitSearch={sumbitSearch}
-                  filter={filter}
-                  header={header}
-                  data={allData}
-                  selectedData={selected}
-                  title="تنظیمات تسهیلات"
-                  api={EXPORT_FACILITIES_PARENT}
-                />
-              )}
-
-              {userPermissions?.LoanSettings?.add && (
-                <Button onClick={() => setOpenCreate(true)} variant="contained">
-                  <AddIcon />
-                  افزودن تنظیمات تسهیلات جدید
-                </Button>
-              )}
-            </div>
-          </div>
-        </Paper>
-        <CustomeLayout
-          limit={limit}
-          setLimit={setLimit}
-          setAllRows={setAllRows}
-          editApi={
-            userPermissions?.LoanSettings?.update
-              ? EDIT_ACTIVE_FACILITIES_PARENT
-              : false
-          }
-          title="تنظیمات تسهیلات "
-          headers={header}
-          setSearch={setsearch}
-          search={search}
-          page={page}
-          total_pages={metaData?.total_pages}
-          setApplySearch={(e) => {
-            setPage(1);
-            setSumbitSearch(e);
-            /* setFilter({ ...filter, search: { value: e, type: "lk" } }); */
-          }}
-          rows={allRows}
-          hasMore={hasMore}
-          loading={loading}
-          setPage={setPage}
-          setting={setting}
-          CurrentPage={CurrentPage}
-          actions={
-            userPermissions?.LoanSettings?.edit
-              ? [
-                  {
-                    title: "خدمات های اجباری ",
-                    handler: (
-                      <>
-                        <Button
-                          onClick={() => setOpen(true)}
-                          variant="outlined"
-                          color="secondary"
-                        >
-                          مشاهده
-                        </Button>
-                      </>
-                    ),
-                  },
-                  {
-                    title: "تسهیلات ",
-                    handler: (
-                      <>
-                        <Button
-                          onClick={(rowData) => {
-                            const data = rowData?.id ? rowData : editingData;
-                            window.open(
-                              `/facilitySetting/${data.id}?title=${data.title}`
-                            );
-                          }}
-                          variant="outlined"
-                        >
-                          مشاهده
-                        </Button>
-                      </>
-                    ),
-                  },
-                  {
-                    title: "ویرایش",
-                    handler: (
-                      <>
-                        <IconButton
-                          onClick={() => {
-                            setOpenEdit(true);
-                          }}
-                        >
-                          <Edit sx={{ color: "#ff2000" }} />
-                        </IconButton>
-                      </>
-                    ),
-                  },
-                ]
-              : false
-          }
-          length={metaData?.total}
-          name={"تسهیلات"}
-          maxHeight={{ lg: "69.5vh", md: "68vh", xl: "74vh" }}
-          setSelected={setSelected}
-          selected={selected}
-          setSort={(e) => {
-            setPage(1);
-            setSort({ ...sort, ...e });
-          }}
-          currentRow={(data) => {
-            setEditingData(data);
-          }}
-          setRefresh={setRefresh}
-        />
-      </div>
-      <FaciltyParentModal
-        open={openEdit || openCreate}
-        forEdit={openEdit}
-        setAllRows={setAllRows}
-        allRows={allRows}
-        financier={financier}
-        guarantors={guarantors}
-        prevData={editingData}
-        close={() => {
-          setOpenCreate(false);
-          setOpenEdit(false);
-          setEditingData({});
+        extraActions={extraActions}
+        currentRow={(data) => {
+          setEditingData(data);
         }}
-        GATES={gateWays}
+        key={`facilities-${refreshData}-${gateWays?.length}-${financier?.length}-${guarantors?.length}`}
       />
+
       <InsuranceModal
         open={open}
         prevData={editingData}
@@ -272,3 +314,5 @@ const FacilityParent = () => {
 };
 
 export default FacilityParent;
+
+// تسک 1: صفحه faciltiesParent به فرم ژنراتور تبدیل شد ✓

@@ -1,191 +1,146 @@
-import { Edit } from "@mui/icons-material";
-import AddIcon from "@mui/icons-material/Add";
-import { Button, IconButton, Paper } from "@mui/material";
-import { useEffect, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { PageTitle } from "../../components/common";
-import Exports from "../../components/common/export";
-import CustomeLayout from "../../components/customeTable";
-import DataFetcher from "../../components/dataFetch";
-import Filters from "../../components/filters";
-import NoAccess from "../../components/noAccess";
-import SyncButton from "../../components/sync";
+import CustomePage from "../../components/customePage";
 import {
   ALL_SMS_PROVIDER,
   DELETE_ALL_SMS_PROVIDER,
   EDIT_ACTIVE_ALL_SMS_PROVIDER,
   EDIT_ACTIVE_SMS_PROVIDER,
   EXPORT_SMS_PROVIDER,
+  CREATE_SMS_PROVIDER,
+  EDIT_SMS_PROVIDER,
+  DELETE_SMS_PROVIDER,
 } from "../../helpers/api-routes";
-import SmsProviderModal from "./modal";
 
 const SMSProvider = () => {
   const { userPermissions } = useSelector((state) => state.relationals);
-  const [selected, setSelected] = useState([]);
-  const { token } = useSelector((state) => state.user);
-
-  const [openCreate, setOpenCreate] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
-  const navigate = useNavigate();
-  const [editingData, setEditingData] = useState({});
-  const [page, setPage] = useState(1);
   const [refreshData, setRefresh] = useState(0);
-  const [search, setsearch] = useState("");
-  const [sumbitSearch, setSumbitSearch] = useState("");
-  const [limit, setLimit] = useState(20);
-  const [filter, setFilter] = useState([]);
-  const [allRows, setAllRows] = useState([]);
 
-  const [sort, setSort] = useState({});
-  const { hasMore, loading, allData, CurrentPage, metaData, header, setting } =
-    DataFetcher(
-      limit,
-      page,
-      sort,
-      ALL_SMS_PROVIDER,
-      filter,
-      true,
-      refreshData,
-      sumbitSearch
-    );
-  useEffect(() => {
-    setAllRows(allData);
-  }, [allData]);
+  // تعریف APIها برای CustomePage
+  const apis = {
+    GET_DATA: ALL_SMS_PROVIDER,
+    EXPORT_DATA: EXPORT_SMS_PROVIDER,
+    EDIT_ACTIVE_DATA: EDIT_ACTIVE_SMS_PROVIDER,
+    DELETE_ALL_DATA: DELETE_ALL_SMS_PROVIDER,
+    EDIT_ACTIVE_ALL_DATA: EDIT_ACTIVE_ALL_SMS_PROVIDER,
+    CREATE_DATA: CREATE_SMS_PROVIDER,
+    EDIT_DATA: EDIT_SMS_PROVIDER,
+    DELETE_DATA: DELETE_SMS_PROVIDER,
+  };
 
-  if (!userPermissions?.smsProvider?.view) {
-    return <NoAccess />;
-  }
+  // تعریف انواع خط
+  const lineTypes = [
+    { id: 1, title: "اشتراکی" },
+    { id: 2, title: "خدماتی" },
+  ];
+
+  const linePriorities = [
+    { id: 1, title: "خط اشتراکی" },
+    { id: 2, title: "خط خدماتی" },
+  ];
+
+  // تعریف فیلدهای فرم برای modal
+  const fields = [
+    {
+      name: 'title',
+      label: 'عنوان',
+      type: 'textInput',
+      required: true,
+      grid: { xs: 12, md: 6 }
+    },
+    {
+      name: 'providerName',
+      label: 'عنوان سرویس دهنده های اس ام اس',
+      type: 'textInput',
+      required: true,
+      grid: { xs: 12, md: 6 }
+    },
+    {
+      name: 'description',
+      label: 'توضیحات',
+      type: 'textInput',
+      required: false,
+      props: {
+        multiline: true,
+        rows: 2
+      },
+      grid: { xs: 12 }
+    },
+    {
+      name: 'servicePriority',
+      label: 'اولویت سرویس',
+      type: 'numberInput',
+      required: false,
+      grid: { xs: 12, md: 6 }
+    },
+    {
+      name: 'lineType',
+      label: 'نوع خط ارسالی',
+      type: 'dropdown',
+      required: false,
+      options: lineTypes,
+      props: {
+        valueKey: 'id',
+        labelKey: 'title'
+      },
+      grid: { xs: 12, md: 6 }
+    },
+    {
+      name: 'linePriority',
+      label: 'اولویت استفاده از خطوط',
+      type: 'dropdown',
+      required: false,
+      options: linePriorities,
+      props: {
+        valueKey: 'id',
+        labelKey: 'title'
+      },
+      grid: { xs: 12, md: 6 }
+    },
+    {
+      name: 'serviceLineActive',
+      label: 'وضعیت خط خدماتی',
+      type: 'switch',
+      required: false,
+      defaultValue: false,
+      grid: { xs: 12, md: 6 }
+    },
+    {
+      name: 'shareLineActive',
+      label: 'وضعیت خط اشتراکی',
+      type: 'switch',
+      required: false,
+      defaultValue: false,
+      grid: { xs: 12, md: 6 }
+    },
+    {
+      name: 'serviceActive',
+      label: 'فعال/غیرفعال سرویس',
+      type: 'switch',
+      required: false,
+      defaultValue: true,
+      grid: { xs: 12, md: 6 }
+    }
+  ];
 
   return (
-    <>
-      <PageTitle
-        broadCrumb={[
-          {
-            title: "      پیام ها",
-            path: "/sms",
-          },
-        ]}
-        title="سرویس دهنده های اس ام اس "
-      />
-      <div className="md:mx-3 mx-1">
-        <Paper
-          sx={{ border: "1px solid #dbdfea", mb: 1, padding: "15px 16px" }}
-          elevation={0}
-        >
-          <div className="flex md:gap-4 gap-1 flex-wrap justify-between">
-            <Filters
-              limit={limit}
-              setLimit={setLimit}
-              headers={header}
-              setFilter={setFilter}
-              filter={filter}
-              setPage={setPage}
-              loading={loading}
-            />
-            <div className="flex justify-end flex-wrap gap-4 items-center">
-              <SyncButton setRefresh={setRefresh} setting={setting} />
-              {userPermissions?.smsProvider.export && (
-                <Exports
-                  sumbitSearch={sumbitSearch}
-                  filter={filter}
-                  header={header}
-                  data={allData}
-                  selectedData={selected}
-                  title="سرویس دهنده های اس ام اس "
-                  api={EXPORT_SMS_PROVIDER}
-                />
-              )}
-
-              {userPermissions?.smsProvider?.insert && (
-                <Button onClick={() => setOpenCreate(true)} variant="contained">
-                  <AddIcon />
-                  افزودن سرویس دهنده اس ام اس جدید
-                </Button>
-              )}
-            </div>
-          </div>
-        </Paper>
-        <CustomeLayout
-          limit={limit}
-          setLimit={setLimit}
-          setAllRows={setAllRows}
-          editApi={
-            userPermissions?.smsProvider?.update
-              ? EDIT_ACTIVE_SMS_PROVIDER
-              : false
-          }
-          title="سرویس دهنده های اس ام اس "
-          headers={header}
-          setSearch={setsearch}
-          search={search}
-          page={page}
-          total_pages={metaData?.total_pages}
-          setApplySearch={(e) => {
-            setPage(1);
-            setSumbitSearch(e);
-            /* setFilter({ ...filter, search: { value: e, type: "lk" } }); */
-          }}
-          rows={allRows}
-          hasMore={hasMore}
-          loading={loading}
-          setPage={setPage}
-          setting={setting}
-          CurrentPage={CurrentPage}
-          actions={[
-            userPermissions?.smsProvider?.update && {
-              title: "ویرایش",
-              handler: (
-                <>
-                  <IconButton
-                    onClick={() => {
-                      setOpenEdit(true);
-                    }}
-                  >
-                    <Edit sx={{ color: "#ff2000" }} />
-                  </IconButton>
-                </>
-              ),
-            },
-          ].filter((t) => t)}
-          length={metaData?.total}
-          name={"شرکت"}
-          maxHeight={{ lg: "69.5vh", md: "68vh", xl: "74vh" }}
-          setSort={(e) => {
-            setPage(1);
-            setSort({ ...sort, ...e });
-          }}
-          currentRow={(data) => {
-            setEditingData(data);
-          }}
-          setSelected={setSelected}
-          selected={selected}
-          setRefresh={setRefresh}
-          deleteAllApi={
-            userPermissions?.smsProvider?.deleteAll
-              ? DELETE_ALL_SMS_PROVIDER
-              : null
-          }
-          editActiveAllApi={
-            userPermissions?.smsProvider?.activeAll
-              ? EDIT_ACTIVE_ALL_SMS_PROVIDER
-              : null
-          }
-        />
-      </div>
-      <SmsProviderModal
-        open={openEdit || openCreate}
-        forEdit={openEdit}
-        setAllRows={setAllRows}
-        allRows={allRows}
-        data={editingData}
-        close={() => {
-          setOpenCreate(false);
-          setOpenEdit(false);
-          setEditingData({});
-        }}
-      />
-    </>
+    <CustomePage
+      apis={apis}
+      title="سرویس دهنده های اس ام اس"
+      canAdd={userPermissions?.smsProvider?.insert}
+      canEdit={userPermissions?.smsProvider?.update}
+      permissionsTag="smsProvider"
+      customeModal={false}
+      feilds={fields}
+      broadCrumb={[
+        {
+          title: "پیام ها",
+          path: "/sms",
+        },
+      ]}
+      key={refreshData}
+    />
   );
 };
 

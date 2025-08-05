@@ -12,6 +12,7 @@ export { default as NumberInput } from "./NumberInput";
 export { default as PageTitle } from "./PageTitle";
 export { default as SearchableDropdown } from "./SearchableDropdown";
 export { default as SearchInput } from "./SearchInput";
+export { default as SelectFromTables } from "./SelectFromTables";
 export { default as ShowImage } from "./ShowImage";
 export { default as TextEditor } from "./TextEditor";
 export { default as TextInput } from "./TextInput";

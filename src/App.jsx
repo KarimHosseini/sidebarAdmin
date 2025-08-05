@@ -225,8 +225,8 @@ const App = () => {
     palette: {
       mode: dark ? "dark" : "light",
       background: {
-        default: !dark ? "#f0f2f5" : "#000",
-        paper: !dark ? "#fff" : "#1d1b20",
+        default: !dark ? "#f0f2f5" : "#0a0a0f",
+        paper: !dark ? "#fff" : "#1a1a2e",
       },
       success: {
         main: dark ? "#10c819" : "#10c819",
@@ -238,7 +238,10 @@ const App = () => {
         main: "#f50000",
       },
       primary: {
-        main: "#198dff",
+        main: "#6366f1",
+      },
+      secondary: {
+        main: "#8b5cf6",
       },
     },
     breakpoints: {
@@ -258,8 +261,9 @@ const App = () => {
             borderRadius: "8px",
             fontWeight: 600,
             textTransform: "none",
-            transition: "all 0.3s ease",
+            transition: "all 0.5s ease",
             boxShadow: "none",
+            padding: "10px 24px",
             "&:hover": {
               boxShadow: "none",
               transform: "translateY(-1px)",
@@ -269,50 +273,54 @@ const App = () => {
             const getGradientByColor = (color) => {
               switch (color) {
                 case "primary":
-                  return dark
-                    ? "linear-gradient(135deg, #1976d2 0%, #1565c0 50%, #0d47a1 100%)"
-                    : "linear-gradient(135deg, #2196f3 0%, #1976d2 50%, #1565c0 100%)";
+                  return "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)";
                 case "secondary":
-                  return dark
-                    ? "linear-gradient(135deg, #7b1fa2 0%, #6a1b9a 50%, #4a148c 100%)"
-                    : "linear-gradient(135deg, #9c27b0 0%, #7b1fa2 50%, #6a1b9a 100%)";
+                  return "linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)";
                 case "success":
-                  return dark
-                    ? "linear-gradient(135deg, #2e7d32 0%, #1b5e20 50%, #1b5e20 100%)"
-                    : "linear-gradient(135deg, #4caf50 0%, #388e3c 50%, #2e7d32 100%)";
+                  return "linear-gradient(135deg, #10b981 0%, #059669 100%)";
                 case "warning":
-                  return dark
-                    ? "linear-gradient(135deg, #f57c00 0%, #ef6c00 50%, #e65100 100%)"
-                    : "linear-gradient(135deg, #ff9800 0%, #f57c00 50%, #ef6c00 100%)";
+                  return "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)";
                 case "error":
-                  return dark
-                    ? "linear-gradient(135deg, #d32f2f 0%, #c62828 50%, #b71c1c 100%)"
-                    : "linear-gradient(135deg, #f44336 0%, #d32f2f 50%, #c62828 100%)";
+                  return "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)";
                 case "info":
-                  return dark
-                    ? "linear-gradient(135deg, #0288d1 0%, #0277bd 50%, #01579b 100%)"
-                    : "linear-gradient(135deg, #03a9f4 0%, #0288d1 50%, #0277bd 100%)";
+                  return "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)";
                 default:
-                  return dark
-                    ? "linear-gradient(135deg, #424242 0%, #303030 50%, #212121 100%)"
-                    : "linear-gradient(135deg, #757575 0%, #616161 50%, #424242 100%)";
+                  return "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)";
               }
             };
 
             return {
-              background: getGradientByColor(ownerState.color),
+              background: getGradientByColor(ownerState.color || "primary"),
               color: "#fff",
-              border: "none",
+              boxShadow: `0 2px 8px ${
+                ownerState.color === "primary" 
+                  ? "rgba(99, 102, 241, 0.15)" 
+                  : ownerState.color === "secondary"
+                  ? "rgba(139, 92, 246, 0.15)"
+                  : ownerState.color === "success"
+                  ? "rgba(16, 185, 129, 0.15)"
+                  : ownerState.color === "warning"
+                  ? "rgba(245, 158, 11, 0.15)"
+                  : ownerState.color === "error"
+                  ? "rgba(239, 68, 68, 0.15)"
+                  : "rgba(107, 114, 128, 0.15)"
+              }`,
               "&:hover": {
-                background: getGradientByColor(ownerState.color),
-                filter: "brightness(1.1)",
-                boxShadow: dark
-                  ? "0 4px 15px rgba(255, 255, 255, 0.1)"
-                  : "0 4px 15px rgba(0, 0, 0, 0.2)",
-              },
-              "&:active": {
-                transform: "translateY(0)",
-                filter: "brightness(0.95)",
+                background: getGradientByColor(ownerState.color || "primary"),
+                filter: "brightness(1.05)",
+                boxShadow: `0 4px 12px ${
+                  ownerState.color === "primary" 
+                    ? "rgba(99, 102, 241, 0.25)" 
+                    : ownerState.color === "secondary"
+                    ? "rgba(139, 92, 246, 0.25)"
+                    : ownerState.color === "success"
+                    ? "rgba(16, 185, 129, 0.25)"
+                    : ownerState.color === "warning"
+                    ? "rgba(245, 158, 11, 0.25)"
+                    : ownerState.color === "error"
+                    ? "rgba(239, 68, 68, 0.25)"
+                    : "rgba(107, 114, 128, 0.25)"
+                }`,
               },
             };
           },
@@ -320,19 +328,19 @@ const App = () => {
             const getBorderGradientByColor = (color) => {
               switch (color) {
                 case "primary":
-                  return dark ? "#64b5f6" : "#1976d2";
+                  return "#6366f1";
                 case "secondary":
-                  return dark ? "#ba68c8" : "#7b1fa2";
+                  return "#8b5cf6";
                 case "success":
-                  return dark ? "#81c784" : "#2e7d32";
+                  return "#10b981";
                 case "warning":
-                  return dark ? "#ffb74d" : "#f57c00";
+                  return "#f59e0b";
                 case "error":
-                  return dark ? "#e57373" : "#d32f2f";
+                  return "#ef4444";
                 case "info":
-                  return dark ? "#4fc3f7" : "#0288d1";
+                  return "#3b82f6";
                 default:
-                  return dark ? "#bdbdbd" : "#757575";
+                  return "#6b7280";
               }
             };
 
@@ -343,9 +351,10 @@ const App = () => {
               background: "transparent",
               borderWidth: "2px",
               "&:hover": {
-                backgroundColor: `${color}08`,
+                backgroundColor: `${color}10`,
                 borderColor: color,
-                boxShadow: `0 0 0 1px ${color}40`,
+                boxShadow: `0 0 0 2px ${color}20`,
+                transform: "translateY(-1px)",
               },
             };
           },
@@ -353,19 +362,19 @@ const App = () => {
             const getTextColorByColor = (color) => {
               switch (color) {
                 case "primary":
-                  return dark ? "#64b5f6" : "#1976d2";
+                  return "#6366f1";
                 case "secondary":
-                  return dark ? "#ba68c8" : "#7b1fa2";
+                  return "#8b5cf6";
                 case "success":
-                  return dark ? "#81c784" : "#2e7d32";
+                  return "#10b981";
                 case "warning":
-                  return dark ? "#ffb74d" : "#f57c00";
+                  return "#f59e0b";
                 case "error":
-                  return dark ? "#e57373" : "#d32f2f";
+                  return "#ef4444";
                 case "info":
-                  return dark ? "#4fc3f7" : "#0288d1";
+                  return "#3b82f6";
                 default:
-                  return dark ? "#bdbdbd" : "#757575";
+                  return "#6b7280";
               }
             };
 
@@ -373,10 +382,143 @@ const App = () => {
             return {
               color: color,
               "&:hover": {
-                backgroundColor: `${color}08`,
+                backgroundColor: `${color}10`,
                 color: color,
               },
             };
+          },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            borderRadius: "8px",
+            backgroundImage: "none",
+            boxShadow: dark 
+              ? "0 2px 8px 0 rgba(0, 0, 0, 0.1)" 
+              : "0 2px 8px 0 rgba(0, 0, 0, 0.03)",
+            border: dark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid rgba(0, 0, 0, 0.05)",
+            backdropFilter: dark ? "blur(10px)" : "none",
+            backgroundColor: dark ? "rgba(26, 26, 46, 0.8)" : "#fff",
+            transition: "all 0.3s ease",
+            "&:hover": {
+              boxShadow: dark 
+                ? "0 16px 48px 0 rgba(31, 38, 135, 0.25)" 
+                : "0 8px 30px 0 rgba(0, 0, 0, 0.12)",
+            },
+          },
+        },
+      },
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "8px",
+              transition: "all 0.5s ease",
+              backgroundColor: dark ? "rgba(255, 255, 255, 0.02)" : "rgba(0, 0, 0, 0.02)",
+              "& fieldset": {
+                borderColor: dark ? "rgba(255, 255, 255, 0.1)" : "#e0e0e0",
+                transition: "all 0.3s ease",
+              },
+              "&:hover fieldset": {
+                borderColor: dark ? "rgba(255, 255, 255, 0.2)" : "#ccc",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#6366f1",
+                borderWidth: "2px",
+              },
+              "&.Mui-focused": {
+                backgroundColor: dark ? "rgba(255, 255, 255, 0.05)" : "#fff",
+                boxShadow: "0 0 0 3px rgba(99, 102, 241, 0.1)",
+              },
+            },
+            "& .MuiInputLabel-root": {
+              color: dark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.6)",
+              "&.Mui-focused": {
+                color: "#6366f1",
+              },
+            },
+          },
+        },
+      },
+      MuiTableContainer: {
+        styleOverrides: {
+          root: {
+            borderRadius: "8px",
+            overflow: "hidden",
+            backgroundColor: dark ? "rgba(255, 255, 255, 0.03)" : "#fff",
+            border: dark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid rgba(0, 0, 0, 0.05)",
+            backdropFilter: dark ? "blur(10px)" : "none",
+            boxShadow: dark 
+              ? "0 8px 32px 0 rgba(31, 38, 135, 0.15)" 
+              : "0 4px 20px 0 rgba(0, 0, 0, 0.08)",
+          },
+        },
+      },
+      MuiTableHead: {
+        styleOverrides: {
+          root: {
+            backgroundColor: dark 
+              ? "rgba(99, 102, 241, 0.08)" 
+              : "rgba(99, 102, 241, 0.05)",
+            "& .MuiTableCell-head": {
+              backgroundColor: "transparent",
+              color: dark ? "rgba(255, 255, 255, 0.9)" : "rgba(0, 0, 0, 0.8)",
+              fontWeight: 600,
+              borderBottom: dark 
+                ? "1px solid rgba(255, 255, 255, 0.1)" 
+                : "1px solid rgba(0, 0, 0, 0.1)",
+            },
+          },
+        },
+      },
+      MuiTableBody: {
+        styleOverrides: {
+          root: {
+            "& .MuiTableRow-root": {
+              transition: "all 0.2s ease",
+              "&:hover": {
+                backgroundColor: dark 
+                  ? "rgba(99, 102, 241, 0.05)" 
+                  : "rgba(99, 102, 241, 0.02)",
+                transform: "translateX(4px)",
+              },
+              "& .MuiTableCell-root": {
+                borderBottom: dark 
+                  ? "1px solid rgba(255, 255, 255, 0.05)" 
+                  : "1px solid rgba(0, 0, 0, 0.05)",
+              },
+            },
+          },
+        },
+      },
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            borderRadius: "8px",
+            fontWeight: 500,
+            transition: "all 0.3s ease",
+            "&:hover": {
+              transform: "translateY(-1px)",
+              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
+            },
+          },
+          filled: {
+            background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+            color: "#fff",
+          },
+        },
+      },
+      MuiIconButton: {
+        styleOverrides: {
+          root: {
+            transition: "all 0.3s ease",
+            "&:hover": {
+              backgroundColor: dark 
+                ? "rgba(99, 102, 241, 0.1)" 
+                : "rgba(99, 102, 241, 0.08)",
+              transform: "scale(1.1)",
+            },
           },
         },
       },

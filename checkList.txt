@@ -1,0 +1,50 @@
+1- our goals is to refactore admin panel to handle large data in tables with 0 render we have huge data like millions of rows so thats why we Decided to use pure js to handle this
+for example if you see on of our pages like pages / Insurance / index.jsx you would see we use CustomePage that how we refactore this page we want use CustomePage for all of tables 
+inside CustomePage we have formGenrator for dynamic modals you can see and check all props also FORM_GENERATOR_DOCUMENTATION.md for better documnet we try to handle most logic by pure js 
+inside utlis folder you can find accordionManager.js  cellManager.js filterUtils.js selectionManager.js with this handler we reduc 70% of renders and create site so fast if a page want use 
+formGenrate like insurance they gave the inputs if they have compelex modals like walletRequests they should try use inside modal right now it has bug if they want redirect to other page like 
+product they redirect to other pages 
+now heres the todos:
+
+1- compelete those page that left and doasnt use CustomePage this is list inside page directory :  beraloan (index.jsx) , blog , blogPoint , branches , categoryInsurance , company , CooperationRequest ,  faciltiesParent , faciltiesSetting , paymentResult,permissionAdmin
+plan,planLoan , preInvoice , refahInstallment , reportAgentSingle , reportAgentTurnover , ReportDaily , ShippingCompanyHoliday , ShippingPricing , showcases ,SMSProvider ,smsContent , sms,smsAccess , tipax , userNotificationType , webSiteSetting ,whitelistHistory
+all of those has index.jsx check them for those should navigate to other page its okey try naviagate but for those has modal try use dynamic modal just use costome modal for those place we want use dynamic forms so 100% piorirty with formGenrator
+also for this check other page too every where use custome modal check if we can use formGenrator try use that not customeModal just use for palce we have too like ProductProperty , also check this some page has extra action like read some id from search params or read from params
+or should send request some where to show some thing or has some trigs for inputs all logic should be same in this refactore version 
+
+2- as we mention we try use pure js for have zero render but in components / customeTable.jsx , TableRowdata.jsx , TableCelldata.jsx where our table make it still has a lot of useless render that make page slow for huge amount of data like a milions try make this as fast as possilbe 
+free to use pure js for handle this remeber do not change any thing comes from api our apis are correct this site is on productions we just one refactore this forexamlple we need all type of tableCell in TableCelldata or all logic in filter or sort in table header
+also now that in modal of custome pages after user add or edit some rows we want change that row inscreen with out render or send any request to backend or we do not want refresh page so make this tables fast that can handle large dataset
+
+3- in this path /pages / product / create.jsx or Product.jsx ass you see we have 2 page for one edit product other for create product which goas to add-product in components and single-product we want make this 2 one so we do not have duplicate 
+refactore this too remember all those work fine and logic should not change in add we have stepper in edit we have tabs , it has 5 step in step one try use react hooks forms with yup for validation all feils should have validion also check ImageUplaoder props and see how it work
+in step cross sell and force cross sell as you see we use product table too choose product you should create new component call selectFromTables in props it just get table api table name selecet and setselected that return select create that we need in other palce too
+doble check 1000  time check price compoenent they work fine now we want exact same Behavior for them see read code careFully 
+
+4-refactore entire companyInfo in pages / companyInfo so there we have some tabs some page that need use this CustomePage refactore this page make ux mutch better its terrible now very longs tabs with but ui ux
+
+5- refactore page home in there we have all widget i want user can drage and replace all widget in where ever it want also can resize them make them small big and ... also check those all widget for those use tables add 3dot icon buttton when user click on them
+ask them in menu you can see this in  barchart and other charts like line and ... and table so change ui of site make sure its be fast as it possible 
+
+6-we have cellManager.js which can user resize columns it doasnt wotk fine in rtl remeber we are rtl 
+
+7- every where in site we have window.open create new function in utilz we want if user right click it open new tab other wise useNavigation to open in current tab 
+
+8- refactore gallery in pages / gallery better cash for images can open image and goas next and prev image
+
+9- use just persian comment so every where see comment or want add comment edit and add in persian 
+
+10- compelete help page read all pages and inputs and compelte this page in persian of all pages add feils and  .... also has search so they can search in help use greate ui ux so user can find their question 
+
+11- make sure rtl and ltr work fine 
+
+12 - read package.json and remove all package that we do not use in our project
+
+13- also    <TextField
+            fullWidth
+            size="small"
+            placeholder="جستجوی امکانات..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} doasnt work fine and has error when user type on this 
+
+14- every where we use form with validation use react hook form with yups

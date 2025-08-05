@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import MenuIcon from "@mui/icons-material/Menu";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import {
   Button,
   Drawer,
@@ -10,7 +11,7 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "jalali-moment";
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -19,8 +20,6 @@ import {
   GET_ACCESS_PROFILE,
   REMOVE_STATIC_DATA_CACHE,
 } from "../../helpers/api-routes";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-
 import { configReq } from "../../helpers/functions";
 import { openDrawer } from "../../redux/slices/menu";
 import axiosInstance from "../dataFetch/axiosInstance";
@@ -28,7 +27,60 @@ import BroadCrumb from "./BroadCrumb";
 import DarkModeSwitch from "./darkModeSwitch";
 import SearchPage from "./searchPage";
 import Settings from "./setting";
-const PageTitle = ({
+
+// Memoized date component for better performance
+const DateDisplay = memo(() => {
+  const { themeColor: themes } = useSelector((state) => state.themeColor);
+  const dark = themes === "dark";
+  
+  return (
+    <Box
+      sx={{
+        background: dark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.03)",
+        display: "flex",
+        mx: 2,
+        gap: 1.5,
+        borderRadius: "8px",
+        py: 1.5,
+        px: 3,
+        transition: "all 0.5s ease",
+        border: dark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid rgba(0, 0, 0, 0.05)",
+      }}
+    >
+      <Typography 
+        sx={{ 
+          fontSize: "0.75rem",
+          color: dark ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.7)",
+        }}
+      >
+        امروز :‌
+      </Typography>
+      <Typography 
+        sx={{ 
+          fontSize: "0.75rem",
+          color: dark ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.7)",
+        }}
+      >
+        {moment(new Date(), "YYYY-MM-DD HH:mm:ss").format("dddd")}
+      </Typography>
+      <Typography 
+        sx={{ 
+          fontSize: "0.75rem",
+          color: dark ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.7)",
+        }}
+      >
+        {new Intl.DateTimeFormat("fa-IR", {
+          month: "short",
+          day: "numeric",
+        }).format(new Date())}
+      </Typography>
+    </Box>
+  );
+});
+
+DateDisplay.displayName = 'DateDisplay';
+
+const PageTitle = memo(({
   title,
   backBtn = false,
   broadCrumb = [],
@@ -45,75 +97,106 @@ const PageTitle = ({
   const { companyInfo } = useSelector((state) => state.relationals);
   const isTablet = useMediaQuery("(min-width:668px)");
   const [open, setOpen] = useState(false);
+  const { themeColor: themes } = useSelector((state) => state.themeColor);
+  const dark = themes === "dark";
+  const isDesktop = useMediaQuery("(min-width:900px)");
 
   useEffect(() => {
-    if (localStorage.getItem("s")) {
-      setuserInfo(JSON.parse(localStorage.getItem("s")));
+    const storedUser = localStorage.getItem("s");
+    if (storedUser) {
+      try {
+        setuserInfo(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Failed to parse user info:", error);
+      }
     }
-  }, [localStorage.getItem("s")]);
-  const isDesktop = useMediaQuery("(min-width:900px)");
+  }, []);
+
   useEffect(() => {
-    if (userInfo && !userAccess) {
+    if (userInfo?.accessId && !userAccess && token) {
       axiosInstance
         .get(
           `${baseUrl}/${GET_ACCESS_PROFILE}?Page=1&Limit=2000`,
           configReq(token)
         )
         .then((res) => {
-          setUserAccess(
-            res?.data?.data?.find((item) => item?.id === userInfo?.accessId)
-              .title
-          );
+          const accessData = res?.data?.data?.find((item) => item?.id === userInfo?.accessId);
+          if (accessData) {
+            setUserAccess(accessData.title);
+          }
         })
-        .catch((err) => {});
+        .catch((err) => {
+          console.error("Failed to fetch access profile:", err);
+        });
     }
-  }, [userInfo]);
+  }, [userInfo?.accessId, userAccess, token]);
+
+  const handleOpenDrawer = useCallback(() => {
+    dispatch(openDrawer(true));
+  }, [dispatch]);
+
+  const handleSettingsOpen = useCallback(() => {
+    setOpen(true);
+  }, []);
+
+  const handleSettingsClose = useCallback(() => {
+    setOpen(false);
+  }, []);
 
   return (
     <Paper
       elevation={0}
+      className="page-title-container"
       sx={{
+        mb: 3,
+        p: 2.5,
+        borderRadius: "8px",
+        background: dark 
+          ? "rgba(255, 255, 255, 0.02)"
+          : "rgba(0, 0, 0, 0.01)",
+        border: dark 
+          ? "1px solid rgba(255, 255, 255, 0.06)" 
+          : "1px solid rgba(0, 0, 0, 0.04)",
+        backdropFilter: "blur(8px)",
+        boxShadow: dark
+          ? "0 2px 8px rgba(0, 0, 0, 0.1)"
+          : "0 2px 8px rgba(0, 0, 0, 0.03)",
+        transition: "all 0.5s ease",
         display: "flex",
-        /*      flexDirection: { xs: "column", sm: "row" }, */
-        py: 2,
         alignItems: "center",
-        gap: { xs: 0.5, sm: 2.5 },
-        height: { md: "50px" },
-        borderBottom: (theme) =>
-          theme.palette.mode === "light"
-            ? "1px solid #dbdfea"
-            : "1px solid rgba(255, 255, 255, 0.1)",
-        mb: "10px",
-        background: (theme) =>
-          theme.palette.mode === "light"
-            ? "#fff"
-            : "transparent",
-        className: (theme) =>
-          theme.palette.mode === "dark" ? "page-title-dark-gradient" : "",
-
+        gap: 2,
+        "&:hover": {
+          boxShadow: dark
+            ? "0 4px 12px rgba(0, 0, 0, 0.15)"
+            : "0 4px 12px rgba(0, 0, 0, 0.05)",
+        },
       }}
-      className="md:px-8 p-1 pr-5 pl-1"
     >
       {!isDesktop && (
         <MenuIcon
           sx={{
-            color: (theme) =>
-              theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.81)" : "#fff",
-            fontSize: "2em",
-            mr: 1,
+            color: dark ? "rgba(255, 255, 255, 0.85)" : "rgba(0, 0, 0, 0.7)",
+            fontSize: "1.75rem",
             cursor: "pointer",
+            transition: "all 0.5s ease",
+            "&:hover": {
+              color: dark ? "#fff" : "#000",
+              transform: "scale(1.05)",
+            },
           }}
-          onClick={() => {
-            dispatch(openDrawer(true));
-          }}
+          onClick={handleOpenDrawer}
         />
       )}
+      
       {hideTitle && (
-        <div
-          className="overflow-x-auto overflow-y-hidden pl-3"
-          style={{ maxWidth: "300px", width: "100%" }}
+        <Box
+          sx={{
+            overflow: "hidden",
+            maxWidth: "350px",
+            flexShrink: 0,
+          }}
         >
-          <div className="w-full min-w-max">
+          <Box sx={{ minWidth: "max-content" }}>
             <BroadCrumb
               current={title}
               links={[
@@ -124,87 +207,127 @@ const PageTitle = ({
                 ...broadCrumb,
               ]}
             />
-          </div>
-        </div>
-      )}
-      <div style={{ flexGrow: 1 }} />
-      <div className="md:flex hidden items-center gap-2">
-        {companyInfo?.maintenanceMode && (
-          <div className="bg-red-600 rounded-2xl py-2 px-3 text-white">
-            حالت تعمیر فعال است
-          </div>
-        )}
-  
-        <Box
-          sx={{
-            background: (theme) =>
-              theme.palette.mode === "light" ? "#f0f2f5" : "#1a2935",
-          }}
-          className="flex mx-5 gap-2 rounded-3xl py-3 px-7"
-        >
-          <span className="text-xs">امروز :‌ </span>
-          <span className="text-xs">
-            {moment(new Date(), "YYYY-MM-DD HH:mm:ss").format("dddd")}
-          </span>
-          <span className="text-xs">
-            {new Intl.DateTimeFormat("fa-IR", {
-              month: "short",
-              day: "numeric",
-            }).format(new Date())}
-          </span>
+          </Box>
         </Box>
-        <div className="flex items-center justify-center md:w-[30px] md:h-[30px] w-[25px] h-[25px] rounded-full border-2 border-[#f0f2f5]">
-          <PersonOutlineIcon
-            sx={{ color: "#cfcfcf", fontSize: { md: "25px", xs: "15px" } }}
-          />
-        </div>
-
-        <div className="md:flex flex-col hidden">
-          <Typography
+      )}
+      
+      <Box sx={{ flexGrow: 1 }} />
+      
+      <Box 
+        sx={{ 
+          display: { xs: "none", md: "flex" }, 
+          alignItems: "center", 
+          gap: 2,
+        }}
+      >
+        {companyInfo?.maintenanceMode && (
+          <Box 
             sx={{
-              fontSize: { md: "0.8rem !important", xs: "1rem !important" },
-              color: (theme) =>
-                theme.palette.mode === "light" ? "#001ee4" : "#90caf9",
-              fontWeight: 900,
+              backgroundColor: "#ef4444",
+              borderRadius: "8px",
+              py: 1,
+              px: 2,
+              color: "#fff",
+              fontSize: "0.875rem",
+              fontWeight: 500,
             }}
           >
-            {userAccess || "ادمین"}
-          </Typography>
-          <div className="flex items-center gap-2">
+            حالت تعمیر فعال است
+          </Box>
+        )}
+  
+        <DateDisplay />
+        
+        <Box 
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: "8px",
+              border: dark 
+                ? "2px solid rgba(255, 255, 255, 0.1)"
+                : "2px solid rgba(0, 0, 0, 0.05)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.5s ease",
+              "&:hover": {
+                borderColor: dark 
+                  ? "rgba(255, 255, 255, 0.2)"
+                  : "rgba(0, 0, 0, 0.1)",
+              },
+            }}
+          >
+            <PersonOutlineIcon
+              sx={{ 
+                color: dark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.6)", 
+                fontSize: "1.25rem",
+              }}
+            />
+          </Box>
+
+          <Box>
             <Typography
               sx={{
-                fontSize: { md: "0.75rem !important", xs: "1rem !important" },
+                fontSize: "0.8rem",
+                color: dark ? "rgba(255, 255, 255, 0.9)" : "#1e40af",
+                fontWeight: 600,
+                lineHeight: 1.2,
+              }}
+            >
+              {userAccess || "ادمین"}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: "0.75rem",
+                color: dark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.6)",
+                lineHeight: 1.2,
               }}
             >
               {userInfo?.fname} {userInfo?.lname}
             </Typography>
-            {/*   <KeyboardArrowDownIcon sx={{ fontSize: "0.8rem !important" }} /> */}
-          </div>
-        </div>
-        <SettingsOutlinedIcon
-          sx={{
-            color: (theme) =>
-              theme.palette.mode === "dark" ? "#aeb5c8" : "#555b6d",
-          }}
-          onClick={() => setOpen(true)}
-          className="cursor-pointer"
-        />
-      </div>{" "}
+          </Box>
+          
+          <SettingsOutlinedIcon
+            sx={{
+              color: dark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.6)",
+              fontSize: "1.25rem",
+              cursor: "pointer",
+              transition: "all 0.5s ease",
+              "&:hover": {
+                color: dark ? "#fff" : "#000",
+                transform: "rotate(90deg)",
+              },
+            }}
+            onClick={handleSettingsOpen}
+          />
+        </Box>
+      </Box>
+      
       <Drawer
         anchor="left"
         open={open}
-        onClose={() => setOpen(false)}
-        className="leftDrawwer"
+        onClose={handleSettingsClose}
+        className="leftDrawer"
         sx={{
           ".MuiPaper-root": {
-            borderRadius: "10px 0px 0px 10px!important",
+            borderRadius: "0 8px 8px 0",
+            transition: "transform 0.5s ease",
           },
         }}
       >
-        <Settings onClose={() => setOpen(false)} />
+        <Settings onClose={handleSettingsClose} />
       </Drawer>
     </Paper>
   );
-};
+});
+
+PageTitle.displayName = 'PageTitle';
 
 export default PageTitle;

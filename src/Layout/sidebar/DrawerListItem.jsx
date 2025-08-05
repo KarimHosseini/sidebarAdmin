@@ -152,7 +152,7 @@ const DrawerListItem = ({ item, viewALl, isOpen, setIsOpen, searchTerm }) => {
                   ? "#001ee4"
                   : "#64b5f6"
                 : theme.palette.mode === "light"
-                ? "rgba(0, 0, 0)"
+                ? "rgba(255, 255, 255, 0.8)"
                 : "rgba(255, 255, 255, 0.9)",
             opacity: viewALl ? 1 : 0,
             ".MuiTypography-root": {
@@ -167,13 +167,13 @@ const DrawerListItem = ({ item, viewALl, isOpen, setIsOpen, searchTerm }) => {
           sx={{
             color: (theme) =>
               theme.palette.mode === "light"
-                ? "rgba(0, 0, 0)"
+                ? "rgba(255, 255, 255, 0.8)"
                 : "rgba(255, 255, 255, 0.8)",
             transform:
               isOpen === item.title && viewALl
                 ? "rotate(90deg)"
                 : "rotate(0deg)",
-            transition: "300ms all ease",
+                                transition: "all 0.5s ease",
             mr: 2,
             fontSize: "1rem",
           }}
@@ -272,7 +272,7 @@ const DrawerListItem = ({ item, viewALl, isOpen, setIsOpen, searchTerm }) => {
                         ? "#001ee4"
                         : "#64b5f6"
                       : theme.palette.mode === "light"
-                      ? "rgba(0, 0, 0)"
+                      ? "rgba(255, 255, 255, 0.8)"
                       : "rgba(255, 255, 255, 0.8)",
                   ".MuiTypography-root": {
                     fontSize: { md: "0.8rem !important" },
@@ -377,7 +377,7 @@ const DrawerListItem2 = ({ item }) => {
                       ? "#001ee4"
                       : "#64b5f6"
                     : theme.palette.mode === "light"
-                    ? "rgba(0, 0, 0)"
+                    ? "rgba(255, 255, 255, 0.8)"
                     : "rgba(255, 255, 255, 0.9)",
               }}
             />
@@ -386,10 +386,10 @@ const DrawerListItem2 = ({ item }) => {
               sx={{
                 color: (theme) =>
                   theme.palette.mode === "light"
-                    ? "rgba(0, 0, 0)"
+                    ? "rgba(255, 255, 255, 0.8)"
                     : "rgba(255, 255, 255, 0.8)",
                 transform: isOpen[index] ? "rotate(90deg)" : "rotate(0deg)",
-                transition: "300ms all ease",
+                transition: "all 0.5s ease",
                 mr: 2,
                 fontSize: "1rem",
               }}
@@ -456,7 +456,7 @@ const DrawerListItem2 = ({ item }) => {
                             ? "#001ee4"
                             : "#64b5f6"
                           : theme.palette.mode === "light"
-                          ? "rgba(0, 0, 0)"
+                          ? "rgba(255, 255, 255, 0.8)"
                           : "rgba(255, 255, 255, 0.7)",
                     }}
                   >
@@ -472,7 +472,7 @@ const DrawerListItem2 = ({ item }) => {
                             ? "#001ee4"
                             : "#64b5f6"
                           : theme.palette.mode === "light"
-                          ? "rgba(0, 0, 0)"
+                          ? "rgba(255, 255, 255, 0.8)"
                           : "rgba(255, 255, 255, 0.8)",
 
                       ".MuiTypography-root": {
@@ -500,7 +500,7 @@ const styles = {
     height: "70px",
     marginBottom: "40px",
     color: (theme) =>
-      theme.palette.mode === "light" ? "rgba(0, 0, 0)" : "#fff",
+      theme.palette.mode === "light" ? "rgba(255, 255, 255, 0.8)" : "#fff",
   },
   listItem: {
     cursor: "pointer",
@@ -512,14 +512,14 @@ const styles = {
     fontSize: "1.25rem",
     color: (theme) =>
       theme.palette.mode === "light"
-        ? "rgba(0, 0, 0)"
+        ? "rgba(255, 255, 255, 0.8)"
         : "rgba(255, 255, 255, 0.8)",
   },
   listItemText: {
     textAlign: "left",
     color: (theme) =>
       theme.palette.mode === "light"
-        ? "rgba(0, 0, 0)"
+        ? "rgba(255, 255, 255, 0.8)"
         : "rgba(255, 255, 255, 0.9)",
   },
   sublistItem: {
@@ -527,7 +527,7 @@ const styles = {
     cursor: "pointer",
     color: (theme) =>
       theme.palette.mode === "light"
-        ? "rgba(0, 0, 0)"
+        ? "rgba(255, 255, 255, 0.8)"
         : "rgba(255, 255, 255, 0.9)",
   },
 };

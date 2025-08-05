@@ -16,7 +16,7 @@ import {
 } from "../../helpers/api-routes";
 import { configReq } from "../../helpers/functions";
 
-const Insurance = () => {
+const Insurance = () => { 
   const { token } = useSelector((state) => state.user);
   const [types, setTypes] = useState([]);
   const [refreshData, setRefresh] = useState(0);

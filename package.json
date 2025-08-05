@@ -8,6 +8,7 @@
     "@emotion/cache": "^11.10.3",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
+    "@hookform/resolvers": "^5.2.1",
     "@monaco-editor/react": "^4.6.0",
     "@mui/icons-material": "^5.10.6",
     "@mui/material": "^5.10.8",
@@ -52,6 +53,7 @@
     "react-draft-wysiwyg": "^1.15.0",
     "react-dropzone": "^14.2.3",
     "react-grid-layout": "^1.5.1",
+    "react-hook-form": "^7.62.0",
     "react-icons": "^4.6.0",
     "react-image-crop": "^10.0.9",
     "react-image-file-resizer": "^0.4.8",
@@ -75,7 +77,8 @@
     "swiper": "^9.3.2",
     "tinymce": "^6.4.1",
     "uuid": "^11.0.3",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "yup": "^1.7.0"
   },
   "scripts": {
     "start": "set PORT=3006 && react-scripts start",

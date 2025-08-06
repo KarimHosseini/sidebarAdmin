@@ -58,7 +58,7 @@ const Sms = () => {
       type: 'custom',
       required: true,
       customRender: ({ value, onChange }) => {
-        const [searchTerm, setSearchTerm] = useState('');
+    /*     const [searchTerm, setSearchTerm] = useState('');
         const filteredUsers = users.filter(u => 
           u.mobile?.includes(searchTerm) || 
           u.userInformation?.name?.includes(searchTerm) ||
@@ -88,7 +88,7 @@ const Sms = () => {
               ))}
             </select>
           </div>
-        );
+        ); */
       }
     },
     {

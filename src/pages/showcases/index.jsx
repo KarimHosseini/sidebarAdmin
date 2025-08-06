@@ -7,13 +7,9 @@ import { useNavigate } from "react-router-dom";
 import CustomePage from "../../components/customePage";
 import {
   ALL_SHOWCASES,
-  DELETE_ALL_SHOWCASE,
   EDIT_ACTIVE_SHOWCASE,
   EditPriority_SHOWCASES_TYPE,
   EXPORT_ALL_SHOWCASES,
-  CREATE_SHOWCASES,
-  EDIT_SHOWCASES,
-  DELETE_SHOWCASES,
 } from "../../helpers/api-routes";
 
 const ShowCases = () => {
@@ -26,10 +22,6 @@ const ShowCases = () => {
     GET_DATA: ALL_SHOWCASES,
     EXPORT_DATA: EXPORT_ALL_SHOWCASES,
     EDIT_ACTIVE_DATA: EDIT_ACTIVE_SHOWCASE,
-    CREATE_DATA: CREATE_SHOWCASES,
-    EDIT_DATA: EDIT_SHOWCASES,
-    DELETE_DATA: DELETE_SHOWCASES,
-    DELETE_ALL_DATA: DELETE_ALL_SHOWCASE,
   };
 
   // عملیات‌های اضافی برای ردیف‌ها

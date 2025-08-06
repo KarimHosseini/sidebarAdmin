@@ -92,7 +92,7 @@ const Payment = () => {
       type: 'custom',
       required: false,
       customRender: ({ value, onChange, label }) => {
-        const momentJalaali = require('moment-jalaali');
+      /*   const momentJalaali = require('moment-jalaali');
         const [selectedDate, setSelectedDate] = useState(
           value ? momentJalaali(value) : null
         );
@@ -126,7 +126,7 @@ const Payment = () => {
             className="form-control"
             inputFormat="jYYYY/jMM/jDD HH:mm"
           />
-        );
+        ); */
       }
     },
     {

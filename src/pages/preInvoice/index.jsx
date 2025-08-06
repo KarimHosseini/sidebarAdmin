@@ -8,7 +8,6 @@ import {
   GET_PREINVOICE,
   CREATE_PREINVOICE,
   EDIT_PREINVOICE,
-  DELETE_PREINVOICE,
 } from "../../helpers/api-routes";
 
 const PreFactor = () => {
@@ -21,7 +20,6 @@ const PreFactor = () => {
     EXPORT_DATA: EXPORT_PREINVOICE,
     CREATE_DATA: CREATE_PREINVOICE,
     EDIT_DATA: EDIT_PREINVOICE,
-    DELETE_DATA: DELETE_PREINVOICE,
   };
 
   return (

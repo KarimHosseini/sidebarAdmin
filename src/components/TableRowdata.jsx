@@ -132,7 +132,7 @@ const TableRowdata = forwardRef(
                       }
                     }}
                   />
-                  {Array.from(Array(item.colSpan - 1).keys()).map(
+              {/*     {Array.from(Array(item.colSpan - 1).keys()).map(
                     (item, index) => (
                       <TableCell
                         key={index + "EmptyTableCell"}
@@ -141,7 +141,7 @@ const TableRowdata = forwardRef(
                         <></>
                       </TableCell>
                     )
-                  )}
+                  )} */}
                 </Fragment>
               );
             }
@@ -150,11 +150,11 @@ const TableRowdata = forwardRef(
           {actions &&
             actions.map((action, index) => (
               <TableCell align="center" key={index + "ActionTableCell"}>
-                {typeof action.handler === "function"
+              {/*   {typeof action.handler === "function"
                   ? action.handler(row)
                   : React.cloneElement(action.handler, {
-                      onClick: action.handler.props.onClick.bind(null, row),
-                    })}
+                      onClick: action?.handler?.props?.onClick?.bind(null, row),
+                    })} */}
               </TableCell>
             ))}
           {setting?.sync && (

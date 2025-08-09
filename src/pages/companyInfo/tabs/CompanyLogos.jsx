@@ -1,8 +1,8 @@
 import React from 'react';
-import Logos from '../logos';
+// import Logos from '../logos';
 
 const CompanyLogos = () => {
-  return <Logos />;
+  return null;
 };
 
 export default CompanyLogos;

@@ -382,3 +382,112 @@
     0 0 30px rgba(99, 102, 241, 0.4),
     0 0 40px rgba(99, 102, 241, 0.2);
 } 
+
+/* Full-screen gradient page background using sidebar theme */
+.gradient-page {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--sidebar-dark-bg);
+  background-image:
+    radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.12) 0%, transparent 50%);
+  overflow: hidden;
+}
+
+.gradient-page::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent,
+    rgba(99, 102, 241, 0.12),
+    transparent,
+    rgba(139, 92, 246, 0.12),
+    transparent
+  );
+  animation: rotate-gradient 24s linear infinite;
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+/* Auth card tweaks (extends glass-card) */
+.auth-card {
+  border-radius: 18px;
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: 0 16px 48px rgba(31, 38, 135, 0.25);
+}
+
+/* Subtle animated top accent bar */
+.auth-card-accent {
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--gradient-primary-start), var(--gradient-primary-end));
+  background-size: 200% 100%;
+  animation: gradient-move 6s ease infinite;
+}
+
+@keyframes gradient-move {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* OTP inputs */
+.otp-inputs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 8px 0 20px;
+}
+
+.otp-input {
+  width: 56px;
+  height: 64px;
+  border-radius: 12px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  color: var(--sidebar-dark-text);
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.25rem;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.otp-input:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.otp-input[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading overlay for auth card */
+.auth-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 15, 30, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+} 

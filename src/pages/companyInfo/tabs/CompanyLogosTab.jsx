@@ -2,20 +2,13 @@ import React, { useState } from 'react';
 import { Box, Tabs, Tab, Paper } from '@mui/material';
 import CustomePage from '../../../components/customePage';
 import {
-  // Main logos APIs
-  GET_LOGOES,
-  EXPORT_LOGOES,
-  EDIT_ACTIVE_LOGOES,
-  CREATE_LOGO,
-  EDIT_LOGO,
-  DELETE_LOGO,
-  // Footer logos APIs
+  // Footer logos APIs (only available)
   GET_FOOTER_LOGOS,
   EXPORT_FOOTER_LOGOES,
   EDIT_ACTIVE_FOOTER_LOGOES,
-  CREATE_FOOTER_LOGO,
-  EDIT_FOOTER_LOGO,
-  DELETE_FOOTER_LOGO,
+  CREATE_FOOTER_LOGOES as CREATE_FOOTER_LOGO,
+  EDIT_FOOTER_LOGOES as EDIT_FOOTER_LOGO,
+  DELETE_FOOTER_LOGOES as DELETE_FOOTER_LOGO,
 } from '../../../helpers/api-routes';
 
 function TabPanel({ children, value, index }) {
@@ -91,15 +84,8 @@ const CompanyLogosTab = () => {
     },
   ];
 
-  // Define APIs for main logos
-  const mainLogoApis = {
-    GET_DATA: GET_LOGOES,
-    EXPORT_DATA: EXPORT_LOGOES,
-    EDIT_ACTIVE_DATA: EDIT_ACTIVE_LOGOES,
-    CREATE_DATA: CREATE_LOGO,
-    EDIT_DATA: EDIT_LOGO,
-    DELETE_DATA: DELETE_LOGO,
-  };
+  // Define APIs for main logos (disabled due to missing endpoints)
+  const mainLogoApis = null;
 
   // Define APIs for footer logos
   const footerLogoApis = {
@@ -125,15 +111,9 @@ const CompanyLogosTab = () => {
       </Paper>
 
       <TabPanel value={tabValue} index={0}>
-        <CustomePage
-          apis={mainLogoApis}
-          title="لوگوهای اصلی"
-          canAdd={true}
-          canEdit={true}
-          permissionsTag="brand"
-          feilds={mainLogoFields}
-          customeModal={false}
-        />
+        <Paper sx={{ p: 3, color: 'text.secondary' }}>
+          این بخش در حال حاضر غیرفعال است.
+        </Paper>
       </TabPanel>
 
       <TabPanel value={tabValue} index={1}>

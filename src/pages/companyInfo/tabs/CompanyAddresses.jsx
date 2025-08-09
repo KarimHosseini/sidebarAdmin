@@ -1,8 +1,8 @@
 import React from 'react';
-import Address from '../address';
+import AddressModal from '../addressModal';
 
 const CompanyAddresses = () => {
-  return <Address />;
+  return null;
 };
 
 export default CompanyAddresses;

@@ -1,12 +1,12 @@
 import React from 'react';
 import CustomePage from '../../../components/customePage';
 import {
-  GET_SITELINKS,
-  EXPORT_SITELINKS,
-  EDIT_ACTIVE_SITELINKS,
-  CREATE_SITELINK,
-  EDIT_SITELINK,
-  DELETE_SITELINK,
+  GET_SITE_LINK as GET_SITELINKS,
+  EXPORT_SITE_LINK as EXPORT_SITELINKS,
+  EDIT_ACTIVE_SITE_LINK as EDIT_ACTIVE_SITELINKS,
+  CREATE_SITE_LINK as CREATE_SITELINK,
+  EDIT_SITE_LINK as EDIT_SITELINK,
+  DELETE_SITE_LINK as DELETE_SITELINK,
 } from '../../../helpers/api-routes';
 
 const CompanyLinksTab = () => {

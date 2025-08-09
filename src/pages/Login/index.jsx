@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PhoneAndroidOutlinedIcon from "@mui/icons-material/PhoneAndroidOutlined";
-import SmsOutlinedIcon from "@mui/icons-material/SmsOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
@@ -19,6 +18,7 @@ import {
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
+import OtpInput from "react-otp-input";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -120,7 +120,7 @@ const Login = () => {
   };
 
   const SendCode = (e, isVoiceCall = false) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (!mobile || !passWord) {
       toast.error("لطفا شماره همراه و رمز عبور را وارد کنید");
       return;
@@ -152,9 +152,9 @@ const Login = () => {
   };
 
   const LoginRequest = (e) => {
-    e.preventDefault();
-    if (!code) {
-      toast.error("لطفا کد تایید را وارد کنید");
+    e?.preventDefault();
+    if (!code || code.length < 5) {
+      toast.error("لطفا کد تایید ۵ رقمی را وارد کنید");
       return;
     }
 
@@ -177,78 +177,145 @@ const Login = () => {
       });
   };
 
+  // Auto-submit OTP when 5 digits are entered
+  useEffect(() => {
+    if (code.length === 5 && state === 2) {
+      LoginRequest();
+    }
+  }, [code]);
+
   const isDarkMode = themeColor === "dark";
 
   return (
     <Box
       sx={{
-        background: (theme) =>
-          theme.palette.mode === "dark"
-            ? "linear-gradient(135deg, #1a1f35 0%, #101224 100%)"
-            : "linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)",
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "20px",
-        backgroundImage: isDarkMode
-          ? "url('https://www.transparenttextures.com/patterns/cubes.png')"
-          : "url('https://www.transparenttextures.com/patterns/white-diamond-dark.png')",
-        backgroundBlendMode: "overlay",
+        position: "relative",
+        overflow: "hidden",
+        background: isDarkMode
+          ? "#0f0f1e"
+          : "linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)",
       }}
-      className="login-container"
     >
+      {/* Animated gradient background */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: isDarkMode
+            ? "radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.15) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.1) 0%, transparent 50%)"
+            : "radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.05) 0%, transparent 50%)",
+          animation: "backgroundMove 15s ease infinite",
+          "@keyframes backgroundMove": {
+            "0%, 100%": { transform: "scale(1) rotate(0deg)" },
+            "50%": { transform: "scale(1.1) rotate(5deg)" },
+          },
+        }}
+      />
+
+      {/* Floating orbs */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: "-10%",
+          right: "-5%",
+          width: "300px",
+          height: "300px",
+          borderRadius: "50%",
+          background: `linear-gradient(135deg, ${
+            isDarkMode ? "rgba(99, 102, 241, 0.2)" : "rgba(99, 102, 241, 0.15)"
+          }, ${
+            isDarkMode ? "rgba(139, 92, 246, 0.1)" : "rgba(139, 92, 246, 0.08)"
+          })`,
+          filter: "blur(60px)",
+          animation: "float 20s ease-in-out infinite",
+          "@keyframes float": {
+            "0%, 100%": { transform: "translateY(0) translateX(0)" },
+            "33%": { transform: "translateY(-30px) translateX(-20px)" },
+            "66%": { transform: "translateY(20px) translateX(10px)" },
+          },
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: "-15%",
+          left: "-10%",
+          width: "400px",
+          height: "400px",
+          borderRadius: "50%",
+          background: `linear-gradient(135deg, ${
+            isDarkMode ? "rgba(59, 130, 246, 0.2)" : "rgba(59, 130, 246, 0.15)"
+          }, ${
+            isDarkMode ? "rgba(99, 102, 241, 0.1)" : "rgba(99, 102, 241, 0.08)"
+          })`,
+          filter: "blur(80px)",
+          animation: "float 25s ease-in-out infinite reverse",
+        }}
+      />
+
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        style={{ zIndex: 1 }}
       >
         <Paper
-          elevation={isDarkMode ? 4 : 8}
+          elevation={0}
           sx={{
-            borderRadius: "16px",
+            width: "420px",
+            borderRadius: "24px",
             overflow: "hidden",
             background: isDarkMode
-              ? "linear-gradient(135deg, #20213a 0%, #0e0f23 100%)"
-              : "#fff",
-            position: "relative",
-            boxShadow: isDarkMode
-              ? "0 10px 30px rgba(0,0,0,0.5)"
-              : "0 10px 30px rgba(0,0,0,0.1)",
+              ? "rgba(255, 255, 255, 0.03)"
+              : "rgba(255, 255, 255, 0.85)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
             border: isDarkMode
-              ? "1px solid rgba(255,255,255,0.05)"
-              : "1px solid rgba(0,0,0,0.05)",
+              ? "1px solid rgba(255, 255, 255, 0.1)"
+              : "1px solid rgba(255, 255, 255, 0.3)",
+            boxShadow: isDarkMode
+              ? "0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(255, 255, 255, 0.02)"
+              : "0 20px 60px rgba(0, 0, 0, 0.1), inset 0 0 30px rgba(255, 255, 255, 0.5)",
+            position: "relative",
+            transition: "all 0.3s ease",
+            "&:hover": {
+              transform: "translateY(-5px)",
+              boxShadow: isDarkMode
+                ? "0 30px 80px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(255, 255, 255, 0.03)"
+                : "0 30px 80px rgba(0, 0, 0, 0.15), inset 0 0 40px rgba(255, 255, 255, 0.6)",
+            },
           }}
         >
-          {/* Decorative top bar with animation - more subtle for enterprise look */}
+          {/* Animated gradient border */}
           <Box
             sx={{
-              height: "6px",
-              width: "100%",
-              background: isDarkMode
-                ? "linear-gradient(90deg, #1e3a8a 0%, #3f51b5 100%)"
-                : "linear-gradient(90deg, #1e3a8a 0%, #3f51b5 100%)",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "4px",
+              background:
+                "linear-gradient(90deg, #6366f1 0%, #8b5cf6 25%, #3b82f6 50%, #6366f1 75%, #8b5cf6 100%)",
               backgroundSize: "200% 100%",
-              animation: "gradientMove 6s ease infinite",
-              "@keyframes gradientMove": {
-                "0%": { backgroundPosition: "0% 50%" },
-                "50%": { backgroundPosition: "100% 50%" },
-                "100%": { backgroundPosition: "0% 50%" },
+              animation: "gradientSlide 4s linear infinite",
+              "@keyframes gradientSlide": {
+                "0%": { backgroundPosition: "0% 0%" },
+                "100%": { backgroundPosition: "200% 0%" },
               },
             }}
           />
 
-          {/* Logo and header - more enterprise styling */}
-          <Box
-            sx={{
-              padding: "32px 32px 0",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Box sx={{ mb: 3, textAlign: "center" }}>
+          {/* Content */}
+          <Box sx={{ padding: "40px 32px" }}>
+            {/* Logo and header */}
+            <Box sx={{ mb: 4, textAlign: "center" }}>
               {companyInfo?.companyLogo ? (
                 <motion.div
                   initial={{ y: -20, opacity: 0 }}
@@ -256,110 +323,91 @@ const Login = () => {
                   transition={{ delay: 0.2, duration: 0.5 }}
                   className="flex flex-col items-center"
                 >
-                  <img
-                    src={`${baseUrl}/${DOWNLOAD_FILE}/${
-                      isDarkMode
-                        ? companyInfo?.companyDarkLogo ||
-                          companyInfo?.companyLogo
-                        : companyInfo?.companyLogo
-                    }`}
-                    alt={companyInfo?.companyTitle || "Company Logo"}
-                    style={{
-                      width: "80px",
-                      height: "40px",
-                      objectFit: "contain",
-                      margin: "0 auto",
-                      filter: isDarkMode
-                        ? "drop-shadow(0 2px 4px rgba(255,255,255,0.1))"
-                        : "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
+                  <Box
+                    sx={{
+                      width: "100px",
+                      height: "100px",
+                      borderRadius: "20px",
+                      background: isDarkMode
+                        ? "rgba(255, 255, 255, 0.05)"
+                        : "rgba(255, 255, 255, 0.8)",
+                      backdropFilter: "blur(10px)",
+                      border: isDarkMode
+                        ? "1px solid rgba(255, 255, 255, 0.1)"
+                        : "1px solid rgba(255, 255, 255, 0.5)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mb: 3,
+                      boxShadow: isDarkMode
+                        ? "0 8px 32px rgba(99, 102, 241, 0.2)"
+                        : "0 8px 32px rgba(99, 102, 241, 0.1)",
                     }}
-                  />
-                  {companyInfo?.companyTitle && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.4, duration: 0.5 }}
-                    >
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          mt: 2,
-                          fontWeight: 500,
-                          color: isDarkMode
-                            ? "rgba(255,255,255,0.9)"
-                            : "rgba(0,0,0,0.85)",
-                          letterSpacing: "0.5px",
-                        }}
-                      >
-                        {companyInfo?.companyTitle}
-                      </Typography>
-                    </motion.div>
-                  )}
+                  >
+                    <img
+                      src={`${baseUrl}/${DOWNLOAD_FILE}/${
+                        isDarkMode
+                          ? companyInfo?.companyDarkLogo ||
+                            companyInfo?.companyLogo
+                          : companyInfo?.companyLogo
+                      }`}
+                      alt={companyInfo?.companyTitle || "Company Logo"}
+                      style={{
+                        width: "60px",
+                        height: "60px",
+                        objectFit: "contain",
+                      }}
+                    />
+                  </Box>
                 </motion.div>
               ) : (
-                <Box
+                <Skeleton
+                  variant="rounded"
+                  width={100}
+                  height={100}
                   sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
+                    borderRadius: "20px",
+                    mb: 3,
+                    mx: "auto",
+                    bgcolor: isDarkMode
+                      ? "rgba(255,255,255,0.1)"
+                      : "rgba(0,0,0,0.1)",
                   }}
-                >
-                  <Skeleton
-                    width={180}
-                    height={90}
-                    variant="rectangular"
-                    sx={{
-                      borderRadius: 2,
-                      bgcolor: isDarkMode
-                        ? "rgba(255,255,255,0.1)"
-                        : "rgba(0,0,0,0.1)",
-                    }}
-                  />
-                  <Skeleton
-                    width={120}
-                    height={30}
-                    variant="text"
-                    sx={{
-                      mt: 1.5,
-                      borderRadius: 1,
-                      bgcolor: isDarkMode
-                        ? "rgba(255,255,255,0.1)"
-                        : "rgba(0,0,0,0.1)",
-                    }}
-                  />
-                </Box>
+                />
               )}
+
+              <Typography
+                variant="h4"
+                component="h1"
+                sx={{
+                  fontWeight: 700,
+                  mb: 1,
+                  background:
+                    "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  letterSpacing: "-0.5px",
+                }}
+              >
+                {state === 1 ? "خوش آمدید" : "تایید هویت"}
+              </Typography>
+
+              <Typography
+                variant="body2"
+                sx={{
+                  color: isDarkMode
+                    ? "rgba(255,255,255,0.6)"
+                    : "rgba(0,0,0,0.6)",
+                  fontSize: "0.9rem",
+                }}
+              >
+                {state === 1
+                  ? "برای ورود به پنل مدیریت اطلاعات خود را وارد کنید"
+                  : `کد ارسال شده به ${mobile} را وارد کنید`}
+              </Typography>
             </Box>
 
-            <Typography
-              variant="h5"
-              component="h1"
-              sx={{
-                fontWeight: 500,
-                mb: 1,
-                color: isDarkMode ? "#fff" : "#333",
-                letterSpacing: "0.3px",
-              }}
-            >
-              {state === 1 ? "ورود به پنل مدیریت" : "تایید کد یکبار مصرف"}
-            </Typography>
-
-            <Typography
-              variant="body2"
-              sx={{
-                mb: 4,
-                color: isDarkMode ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)",
-                textAlign: "center",
-              }}
-            >
-              {state === 1
-                ? "لطفا اطلاعات خود را وارد کنید"
-                : `کد ارسال شده به شماره ${mobile} را وارد کنید`}
-            </Typography>
-          </Box>
-
-          {/* Form content - more enterprise styling */}
-          <Box sx={{ padding: "0 32px 32px" }}>
             <AnimatePresence mode="wait">
               {state === 1 ? (
                 <motion.div
@@ -383,21 +431,57 @@ const Login = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <PhoneAndroidOutlinedIcon color="action" />
+                            <PhoneAndroidOutlinedIcon
+                              sx={{
+                                color: "#6366f1",
+                              }}
+                            />
                           </InputAdornment>
                         ),
                       }}
                       sx={{
-                        mb: 2.5,
+                        mb: 3,
                         "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
+                          height: "56px",
+                          borderRadius: "16px",
+                          fontSize: "1.1rem",
+                          background: isDarkMode
+                            ? "rgba(255, 255, 255, 0.03)"
+                            : "rgba(255, 255, 255, 0.5)",
+                          backdropFilter: "blur(10px)",
                           transition: "all 0.3s ease",
+                          "& input": {
+                            fontSize: "1.1rem",
+                            letterSpacing: "0.5px",
+                          },
+                          "&:hover": {
+                            background: isDarkMode
+                              ? "rgba(255, 255, 255, 0.05)"
+                              : "rgba(255, 255, 255, 0.7)",
+                          },
                           "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#1e3a8a",
+                            borderColor: "#6366f1",
+                            borderWidth: "2px",
+                          },
+                          "&.Mui-focused": {
+                            background: isDarkMode
+                              ? "rgba(255, 255, 255, 0.05)"
+                              : "rgba(255, 255, 255, 0.8)",
                           },
                           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderWidth: "1px",
-                            borderColor: "#1e3a8a",
+                            borderColor: "#6366f1",
+                            borderWidth: "2px",
+                          },
+                        },
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: isDarkMode
+                            ? "rgba(255, 255, 255, 0.2)"
+                            : "rgba(99, 102, 241, 0.2)",
+                        },
+                        "& .MuiInputLabel-root": {
+                          fontSize: "1rem",
+                          "&.Mui-focused": {
+                            color: "#6366f1",
                           },
                         },
                       }}
@@ -414,7 +498,11 @@ const Login = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <LockOutlinedIcon color="action" />
+                            <LockOutlinedIcon
+                              sx={{
+                                color: "#6366f1",
+                              }}
+                            />
                           </InputAdornment>
                         ),
                         endAdornment: (
@@ -423,11 +511,11 @@ const Login = () => {
                               onClick={() => setseePassword(!seePassword)}
                               edge="end"
                               sx={{
-                                color: seePassword
-                                  ? "#1e3a8a"
-                                  : "text.secondary",
+                                color: seePassword ? "#6366f1" : "inherit",
                                 transition: "all 0.2s ease",
-                                mr: "9px",
+                                "&:hover": {
+                                  background: "rgba(99, 102, 241, 0.1)",
+                                },
                               }}
                             >
                               {seePassword ? (
@@ -442,14 +530,46 @@ const Login = () => {
                       sx={{
                         mb: 4,
                         "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
+                          height: "56px",
+                          borderRadius: "16px",
+                          fontSize: "1.1rem",
+                          background: isDarkMode
+                            ? "rgba(255, 255, 255, 0.03)"
+                            : "rgba(255, 255, 255, 0.5)",
+                          backdropFilter: "blur(10px)",
                           transition: "all 0.3s ease",
+                          "& input": {
+                            fontSize: "1.1rem",
+                            letterSpacing: "0.5px",
+                          },
+                          "&:hover": {
+                            background: isDarkMode
+                              ? "rgba(255, 255, 255, 0.05)"
+                              : "rgba(255, 255, 255, 0.7)",
+                          },
                           "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#1e3a8a",
+                            borderColor: "#6366f1",
+                            borderWidth: "2px",
+                          },
+                          "&.Mui-focused": {
+                            background: isDarkMode
+                              ? "rgba(255, 255, 255, 0.05)"
+                              : "rgba(255, 255, 255, 0.8)",
                           },
                           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderWidth: "1px",
-                            borderColor: "#1e3a8a",
+                            borderColor: "#6366f1",
+                            borderWidth: "2px",
+                          },
+                        },
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: isDarkMode
+                            ? "rgba(255, 255, 255, 0.2)"
+                            : "rgba(99, 102, 241, 0.2)",
+                        },
+                        "& .MuiInputLabel-root": {
+                          fontSize: "1rem",
+                          "&.Mui-focused": {
+                            color: "#6366f1",
                           },
                         },
                       }}
@@ -459,29 +579,59 @@ const Login = () => {
                       type="submit"
                       fullWidth
                       variant="contained"
-                      color="primary"
                       size="large"
                       disabled={loading || !mobile || !passWord}
                       sx={{
-                        py: 1.5,
-                        borderRadius: "8px",
-                        boxShadow: "0 2px 8px rgba(30, 58, 138, 0.2)",
-                        background: isDarkMode
-                          ? "linear-gradient(to right, #1e3a8a, #3f51b5)"
-                          : "linear-gradient(to right, #1e3a8a, #3f51b5)",
+                        height: "56px",
+                        borderRadius: "16px",
+                        background:
+                          "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                        boxShadow: "0 8px 32px rgba(99, 102, 241, 0.3)",
                         transition: "all 0.3s ease",
                         textTransform: "none",
-                        fontWeight: 500,
+                        fontSize: "1.1rem",
+                        fontWeight: 600,
                         letterSpacing: "0.5px",
+                        position: "relative",
+                        overflow: "hidden",
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background:
+                            "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                          opacity: 0,
+                          transition: "opacity 0.3s ease",
+                        },
                         "&:hover": {
-                          boxShadow: "0 4px 12px rgba(30, 58, 138, 0.3)",
+                          transform: "translateY(-2px)",
+                          boxShadow: "0 12px 40px rgba(99, 102, 241, 0.4)",
+                          "&::before": {
+                            opacity: 1,
+                          },
+                        },
+                        "&:disabled": {
+                          background: isDarkMode
+                            ? "rgba(255, 255, 255, 0.1)"
+                            : "rgba(0, 0, 0, 0.1)",
+                          boxShadow: "none",
                         },
                       }}
                     >
                       {loading ? (
-                        <CircularProgress size={24} color="inherit" />
+                        <CircularProgress
+                          size={28}
+                          sx={{
+                            color: "white",
+                          }}
+                        />
                       ) : (
-                        "ورود"
+                        <span style={{ position: "relative", zIndex: 1 }}>
+                          ورود به حساب
+                        </span>
                       )}
                     </Button>
                   </form>
@@ -495,35 +645,35 @@ const Login = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <form onSubmit={LoginRequest}>
-                    {/* Timer display with circular progress - more enterprise styling */}
+                    {/* Timer display */}
                     {isTimerActive && (
                       <Box
                         sx={{
                           display: "flex",
-                          flexDirection: "column",
                           alignItems: "center",
                           justifyContent: "center",
-                          mb: 3,
-                          p: 2,
-                          borderRadius: "8px",
-                          background: isDarkMode
-                            ? "rgba(30, 58, 138, 0.08)"
-                            : "rgba(30, 58, 138, 0.04)",
-                          border: "1px solid",
-                          borderColor: isDarkMode
-                            ? "rgba(30, 58, 138, 0.2)"
-                            : "rgba(30, 58, 138, 0.1)",
+                          mb: 4,
+                          py: 2,
                         }}
                       >
-                        <Box sx={{ position: "relative", mb: 1 }}>
+                        <Box
+                          sx={{
+                            position: "relative",
+                            width: "80px",
+                            height: "80px",
+                          }}
+                        >
                           <CircularProgress
                             variant="determinate"
                             value={(timer / 120) * 100}
-                            size={50}
+                            size={80}
                             thickness={3}
                             sx={{
-                              color: timer > 30 ? "#1e3a8a" : "#dc2626",
+                              color: timer > 30 ? "#6366f1" : "#dc2626",
                               transition: "color 0.5s ease",
+                              "& .MuiCircularProgress-circle": {
+                                strokeLinecap: "round",
+                              },
                             }}
                           />
                           <Box
@@ -534,125 +684,193 @@ const Login = () => {
                               bottom: 0,
                               right: 0,
                               display: "flex",
+                              flexDirection: "column",
                               alignItems: "center",
                               justifyContent: "center",
                             }}
                           >
                             <TimerOutlinedIcon
                               sx={{
-                                color: timer > 30 ? "#1e3a8a" : "#dc2626",
-                                transition: "color 0.5s ease",
-                                fontSize: "1.2rem",
+                                color: timer > 30 ? "#6366f1" : "#dc2626",
+                                fontSize: "1.5rem",
+                                mb: 0.5,
                               }}
                             />
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: timer > 30 ? "#6366f1" : "#dc2626",
+                                fontWeight: 600,
+                                fontSize: "0.9rem",
+                              }}
+                            >
+                              {formatPersianTime(formatTime(timer))}
+                            </Typography>
                           </Box>
                         </Box>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: timer > 30 ? "#1e3a8a" : "#dc2626",
-                            transition: "color 0.5s ease",
-                            fontWeight: 500,
-                          }}
-                        >
-                          {formatPersianTime(formatTime(timer))}
-                        </Typography>
                       </Box>
                     )}
 
-                    <TextField
-                      variant="outlined"
-                      label="کد تایید"
-                      fullWidth
-                      autoFocus
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      type="tel"
-                      margin="normal"
-                      disabled={!isTimerActive}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <SmsOutlinedIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                      sx={{
-                        mb: 4,
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                          transition: "all 0.3s ease",
-                          "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#1e3a8a",
-                          },
-                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderWidth: "1px",
-                            borderColor: "#1e3a8a",
-                          },
-                        },
-                      }}
-                    />
+                    {/* OTP Input */}
+                    <Box sx={{ mb: 4 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          mb: 2,
+                          textAlign: "center",
+                          color: isDarkMode
+                            ? "rgba(255,255,255,0.7)"
+                            : "rgba(0,0,0,0.7)",
+                        }}
+                      >
+                        کد تایید ۵ رقمی را وارد کنید
+                      </Typography>
+                      <OtpInput
+                        value={code}
+                        onChange={setCode}
+                        numInputs={5}
+                        renderSeparator={<span style={{ width: "8px" }}></span>}
+                        renderInput={(props) => (
+                          <input
+                            {...props}
+                            style={{
+                              width: "56px",
+                              height: "56px",
+                              borderRadius: "16px",
+                              border: isDarkMode
+                                ? "2px solid rgba(255, 255, 255, 0.2)"
+                                : "2px solid rgba(99, 102, 241, 0.2)",
+                              background: isDarkMode
+                                ? "rgba(255, 255, 255, 0.03)"
+                                : "rgba(255, 255, 255, 0.5)",
+                              backdropFilter: "blur(10px)",
+                              fontSize: "1.5rem",
+                              fontWeight: "600",
+                              textAlign: "center",
+                              color: isDarkMode ? "#fff" : "#000",
+                              transition: "all 0.3s ease",
+                              outline: "none",
+                              ...(props.style || {}),
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.borderColor = "#6366f1";
+                              e.target.style.background = isDarkMode
+                                ? "rgba(255, 255, 255, 0.05)"
+                                : "rgba(255, 255, 255, 0.8)";
+                              e.target.style.transform = "scale(1.05)";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.borderColor = isDarkMode
+                                ? "rgba(255, 255, 255, 0.2)"
+                                : "rgba(99, 102, 241, 0.2)";
+                              e.target.style.background = isDarkMode
+                                ? "rgba(255, 255, 255, 0.03)"
+                                : "rgba(255, 255, 255, 0.5)";
+                              e.target.style.transform = "scale(1)";
+                            }}
+                            disabled={!isTimerActive || loading}
+                          />
+                        )}
+                        shouldAutoFocus
+                        inputType="tel"
+                        containerStyle={{
+                          display: "flex",
+                          justifyContent: "center",
+                          gap: "8px",
+                        }}
+                      />
+                    </Box>
 
                     <Button
                       type="submit"
                       fullWidth
                       variant="contained"
-                      color="primary"
                       size="large"
-                      disabled={loading || !isTimerActive || !code}
+                      disabled={loading || !isTimerActive || code.length < 5}
                       sx={{
-                        py: 1.5,
+                        height: "56px",
                         mb: 3,
-                        borderRadius: "8px",
-                        boxShadow: "0 2px 8px rgba(30, 58, 138, 0.2)",
-                        background: isDarkMode
-                          ? "linear-gradient(to right, #1e3a8a, #3f51b5)"
-                          : "linear-gradient(to right, #1e3a8a, #3f51b5)",
+                        borderRadius: "16px",
+                        background:
+                          "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                        boxShadow: "0 8px 32px rgba(99, 102, 241, 0.3)",
                         transition: "all 0.3s ease",
                         textTransform: "none",
-                        fontWeight: 500,
+                        fontSize: "1.1rem",
+                        fontWeight: 600,
                         letterSpacing: "0.5px",
+                        position: "relative",
+                        overflow: "hidden",
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background:
+                            "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                          opacity: 0,
+                          transition: "opacity 0.3s ease",
+                        },
                         "&:hover": {
-                          boxShadow: "0 4px 12px rgba(30, 58, 138, 0.3)",
+                          transform: "translateY(-2px)",
+                          boxShadow: "0 12px 40px rgba(99, 102, 241, 0.4)",
+                          "&::before": {
+                            opacity: 1,
+                          },
+                        },
+                        "&:disabled": {
+                          background: isDarkMode
+                            ? "rgba(255, 255, 255, 0.1)"
+                            : "rgba(0, 0, 0, 0.1)",
+                          boxShadow: "none",
                         },
                       }}
                     >
                       {loading ? (
-                        <CircularProgress size={24} color="inherit" />
+                        <CircularProgress
+                          size={28}
+                          sx={{
+                            color: "white",
+                          }}
+                        />
                       ) : (
-                        "تایید و ورود"
+                        <span style={{ position: "relative", zIndex: 1 }}>
+                          تایید و ورود
+                        </span>
                       )}
                     </Button>
 
-                    <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                    <Box sx={{ display: "flex", gap: 2 }}>
                       <Button
                         variant="outlined"
-                        color="inherit"
                         fullWidth
                         onClick={() => {
                           setState(1);
+                          setCode("");
                           if (timerRef.current) {
                             clearInterval(timerRef.current);
                             setIsTimerActive(false);
                           }
                         }}
                         sx={{
-                          borderRadius: "8px",
-                          py: 1.2,
-                          borderWidth: "1px",
+                          height: "48px",
+                          borderRadius: "12px",
                           borderColor: isDarkMode
-                            ? "rgba(255,255,255,0.3)"
-                            : "rgba(0,0,0,0.23)",
+                            ? "rgba(255,255,255,0.2)"
+                            : "rgba(99, 102, 241, 0.3)",
                           color: isDarkMode
                             ? "rgba(255,255,255,0.8)"
-                            : "rgba(0,0,0,0.7)",
+                            : "#6366f1",
                           textTransform: "none",
-                          fontWeight: 400,
+                          fontWeight: 500,
+                          backdropFilter: "blur(10px)",
+                          transition: "all 0.3s ease",
                           "&:hover": {
-                            borderWidth: "1px",
-                            backgroundColor: isDarkMode
-                              ? "rgba(255,255,255,0.05)"
-                              : "rgba(0,0,0,0.04)",
+                            borderColor: "#6366f1",
+                            background: "rgba(99, 102, 241, 0.1)",
+                            transform: "translateY(-2px)",
                           },
                         }}
                       >
@@ -662,18 +880,22 @@ const Login = () => {
                       {!isTimerActive && (
                         <Button
                           variant="outlined"
-                          color="primary"
                           fullWidth
                           onClick={(e) => SendCode(e)}
                           disabled={loading}
                           sx={{
-                            borderRadius: "8px",
-                            py: 1.2,
-                            borderWidth: "1px",
+                            height: "48px",
+                            borderRadius: "12px",
+                            borderColor: "#6366f1",
+                            color: "#6366f1",
                             textTransform: "none",
-                            fontWeight: 400,
+                            fontWeight: 500,
+                            backdropFilter: "blur(10px)",
+                            transition: "all 0.3s ease",
                             "&:hover": {
-                              borderWidth: "1px",
+                              borderColor: "#6366f1",
+                              background: "rgba(99, 102, 241, 0.1)",
+                              transform: "translateY(-2px)",
                             },
                           }}
                         >
@@ -689,28 +911,28 @@ const Login = () => {
                     {!isTimerActive && (
                       <Button
                         variant="text"
-                        color="inherit"
                         fullWidth
                         onClick={(e) => SendCode(e, true)}
                         disabled={loading}
                         sx={{
                           mt: 2,
+                          height: "40px",
                           borderRadius: "8px",
-                          py: 1,
                           color: isDarkMode
-                            ? "rgba(255,255,255,0.7)"
+                            ? "rgba(255,255,255,0.6)"
                             : "rgba(0,0,0,0.6)",
                           textTransform: "none",
                           fontWeight: 400,
+                          fontSize: "0.9rem",
+                          transition: "all 0.3s ease",
                           "&:hover": {
-                            backgroundColor: isDarkMode
-                              ? "rgba(255,255,255,0.03)"
-                              : "rgba(0,0,0,0.03)",
+                            background: "rgba(99, 102, 241, 0.05)",
+                            color: "#6366f1",
                           },
                         }}
                       >
                         {loading ? (
-                          <CircularProgress size={20} color="inherit" />
+                          <CircularProgress size={16} color="inherit" />
                         ) : (
                           "دریافت کد از طریق تماس صوتی"
                         )}
